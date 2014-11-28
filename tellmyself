@@ -1,0 +1,14 @@
+http://host/proj/module1
+	proj <==> disk_dir_path
+	 在disk_dir_path有个配置文件，维护module1和url映射关系
+	 
+
+	 
+socket buffer
+	-->network buffer
+		-->protocol request
+			-->applet code_buffer
+		<--protocol response
+	<--network response-ref
+socket buffer		
+			
