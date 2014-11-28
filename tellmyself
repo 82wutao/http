@@ -1,14 +1,9 @@
 http://host/proj/module1
 	proj <==> disk_dir_path
-	 ÔÚdisk_dir_pathÓÐ¸öÅäÖÃÎÄ¼þ£¬Î¬»¤module1ºÍurlÓ³Éä¹ØÏµ
+	 ï¿½ï¿½disk_dir_pathï¿½Ð¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½Î¬ï¿½ï¿½module1ï¿½ï¿½urlÓ³ï¿½ï¿½ï¿½Ïµ
 	 
 
 	 
-socket buffer
-	-->network buffer
-		-->protocol request
-			-->applet code_buffer
-		<--protocol response
-	<--network response-ref
-socket buffer		
+alias
+	rout
 			
