@@ -1,0 +1,10 @@
+eclipse.preferences.version=1
+encoding//src/com/game/tools/networks/AsynchronizedTaskFactory.java=UTF-8
+encoding//src/com/game/tools/networks/IOHandler.java=UTF-8
+encoding//src/com/game/tools/networks/IOService.java=UTF-8
+encoding//src/com/game/tools/networks/IProtocol.java=UTF-8
+encoding//src/com/game/tools/networks/NetworkConfig.java=UTF-8
+encoding//src/com/game/tools/networks/NetworkSession.java=UTF-8
+encoding//src/com/game/tools/networks/RequestMsg.java=UTF-8
+encoding//src/com/game/tools/networks/ResponseMsg.java=UTF-8
+encoding/<project>=UTF-8
