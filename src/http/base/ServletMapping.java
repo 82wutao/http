@@ -5,7 +5,7 @@ import http.app.HttpFilter;
 import http.app.HttpRequest;
 import http.app.HttpResponse;
 
-public class Alias implements HttpFilter {
+public class ServletMapping  implements HttpFilter {
 	@Override
 	public void filt(HttpServerContext context, HttpRequest request,
 			HttpResponse response) {
@@ -13,3 +13,4 @@ public class Alias implements HttpFilter {
 
 	}
 }
+

@@ -1,12 +1,12 @@
 package http.base;
 
+import http.app.Cookie;
 import http.app.HttpRequest;
 import http.net.kernel.XBuffer;
 
+import java.net.Socket;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SimpleHttpRequest implements HttpRequest {
@@ -16,11 +16,12 @@ public class SimpleHttpRequest implements HttpRequest {
 
 	private Map<String, String> param_map = new HashMap<String, String>();
 
-	private List<XBuffer> body = new ArrayList<XBuffer>();
-	private int bodyChunkIndex = 0;
-private long readedFromBody=0;
+	Socket channel;
+	private XBuffer bodyBegin ;
+	private long readedFromBody = 0;
 
-	public SimpleHttpRequest() {
+	public SimpleHttpRequest(Socket channel) {
+		this.channel=channel;
 	}
 
 	@Override
@@ -59,46 +60,30 @@ private long readedFromBody=0;
 	}
 
 	@Override
-	public boolean endOfBody() {
-		String length = head_map.get(Head_ContentLength_Request);
-		if (length==null
-				||length.equals("0")) {
-			return true;
-		}
-		
-		long contentLength = Long.parseLong(length);
-		
-		if (readedFromBody <contentLength) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public int readFromBody(byte[] buffer,int off,int length) {
-		int chunks = body.size();
-		if (bodyChunkIndex==chunks) {
-			return -1;
-		}
-		
-		XBuffer chunk =body.get(bodyChunkIndex);
-		int chunk_off=chunk.getPosition();
-		int chunk_limit=chunk.getLimit();
-		int chunk_size = chunk_limit - chunk_off;
-		byte[] chunk_data = chunk.getData();
-		
-		if (chunk_size <= length) {
-			length = chunk_size;
-		}
-		System.arraycopy(chunk_data, chunk_off, buffer, off, length);
-		chunk.setPosition(chunk_off+length);
-		if ((chunk_off+length) == chunk_limit) {
-			bodyChunkIndex++;
-		}
-		
-		int readed = length;
-		readedFromBody +=readed;
-		return readed;
+	public int readFromBody(byte[] buffer, int off, int length) {
+//		int chunks = body.size();
+//		if (bodyChunkIndex == chunks) {
+//			return -1;
+//		}
+//
+//		XBuffer chunk = body.get(bodyChunkIndex);
+//		int chunk_off = chunk.getPosition();
+//		int chunk_limit = chunk.getLimit();
+//		int chunk_size = chunk_limit - chunk_off;
+//		byte[] chunk_data = chunk.getData();
+//
+//		if (chunk_size <= length) {
+//			length = chunk_size;
+//		}
+//		System.arraycopy(chunk_data, chunk_off, buffer, off, length);
+//		chunk.setPosition(chunk_off + length);
+//		if ((chunk_off + length) == chunk_limit) {
+//			bodyChunkIndex++;
+//		}
+//
+//		int readed = length;
+//		readedFromBody += readed;
+		return 0;//readed;
 	}
 
 	public void setHead(XBuffer buffer) {
@@ -108,7 +93,7 @@ private long readedFromBody=0;
 		int length = limit - off;
 
 		String str = new String(header.getData(), off, length,
-				Charset.forName("utf8"));
+				Charset.forName("ASCII"));
 		head_str = str;
 
 		String[] fields = str.split("\r\n");
@@ -122,26 +107,11 @@ private long readedFromBody=0;
 			String[] kv = fields[i].split(":");
 			head_map.put(kv[0], kv[1]);
 		}
-		int index = method_uri_version[1].indexOf('?');
-		if (index == -1) {
-			return;
-		}
-		String[] uri_params = method_uri_version[1].split("\\?");
-		if (uri_params.length == 1) {
-			return;
-		}
-		if (uri_params[1].equals("")) {
-			return;
-		}
-		String[] params = uri_params[1].split("&");
-		for (int i = 0; i < params.length; i++) {
-			String[] kv = params[i].split("=");
-			param_map.put(kv[0], kv[1]);
-		}
+		
 	}
 
-	public void append2Body(XBuffer buffer) {
-		body.add(buffer);
+	public void bodyBegin(XBuffer buffer) {
+		bodyBegin=buffer;
 	}
 
 	@Override
@@ -155,4 +125,37 @@ private long readedFromBody=0;
 		return null;
 	}
 
+	public void parseParamers() {
+		String method =getRequestMethod();
+		if (method.trim().equals("GET")) {
+			
+			String uri = getRequestUri();
+			
+			int index = uri.indexOf('?');
+			if (index == -1) {
+				return;
+			}
+			String[] uri_params = uri.split("\\?");
+			if (uri_params.length == 1) {
+				return;
+			}
+			if (uri_params[1].equals("")) {
+				return;
+			}
+			String[] params = uri_params[1].split("&");
+			for (int i = 0; i < params.length; i++) {
+				String[] kv = params[i].split("=");
+				param_map.put(kv[0], kv[1]);
+			}
+			return ;
+		}
+		
+		
+
+	}
+
+	@Override
+	public Cookie[] getCookies() {
+		return null;
+	}
 }

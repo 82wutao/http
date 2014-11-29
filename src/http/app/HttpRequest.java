@@ -14,6 +14,7 @@ public interface HttpRequest {
 	public static final String Head_DNT_Request="DNT";
 	public static final String Head_Connection_Request="Connection";
 	public static final String Head_ContentLength_Request="Content-Length";
+	public static final String Head_ContentType_Request="Content-Type";
 	
 	public Map<String, String> getRequestHeads() ;
 	public String getRequestHead(String key) ;
@@ -25,7 +26,9 @@ public interface HttpRequest {
 	
 	public String getParamerValue(String paramer);
 	
-	public boolean endOfBody();
+	public Cookie[] getCookies();
+	
+
 	public int readFromBody(byte[] buffer,int off,int length);
 	
 	public String dumpHead();

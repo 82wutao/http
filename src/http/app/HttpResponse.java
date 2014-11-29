@@ -14,4 +14,6 @@ public interface HttpResponse {
 	public void write(byte[] data,int off,int length);
 	public void write(String text);
 	public void write(File file);
+	
+	public void addCookie(Cookie cookie);
 }

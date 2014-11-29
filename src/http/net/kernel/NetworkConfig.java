@@ -10,14 +10,13 @@ import java.net.SocketAddress;
  */
 public class NetworkConfig {
 	public SocketAddress address;
-	public IOHandler handler;
 	public int acceptBacklog;
-	public IProtocol factory;
 	public boolean tcpNoDelay;
 	public int rcvBuffer;
 	public int sendBuffer;
+	public HttpProtocol protocol;
 	
-	public NetworkConfig(String host,int port,IOHandler handler,IProtocol protocol){
+	public NetworkConfig(String host,int port,HttpProtocol protocol){
 		if (host==null
 				||host.equals("")) {
 			address = new InetSocketAddress(port);
@@ -26,14 +25,11 @@ public class NetworkConfig {
 		}
 			
 		
-		this.handler = handler;
-		
 		acceptBacklog=1000;
-		factory=protocol;
 		tcpNoDelay = true;
 		rcvBuffer = 5120;
 		sendBuffer = 32768;
-		
+		this.protocol=protocol;
 	}
 	
 }
