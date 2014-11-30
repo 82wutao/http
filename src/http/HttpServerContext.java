@@ -1,33 +1,65 @@
 package http;
 
-import http.app.HttpFilter;
-import http.app.HttpRequest;
-import http.app.HttpResponse;
-import http.net.kernel.HttpProccesser;
-
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+
+import http.app.WebAppContext;
+import http.base.Alias;
 
 public class HttpServerContext {
-	private List<HttpFilter> filters=new ArrayList<HttpFilter>();
-	
-	public String getHtmlDocumentDir(){return "";}
+	String wwwDir;
+	String workerThread;
+	Alias alias = null;
 
-	public void initial() {
-		
+	public HttpServerContext() {
+	alias=	new Alias(this);
+	}
+
+	public void initial(String conf) {
+		File file = new File(conf);
+		if (!file.exists()) {
+			System.exit(1);
+		}
+		FileInputStream fileInputStream = null;
+		Properties properties = new Properties();
+		try {
+			fileInputStream = new FileInputStream(file);
+			properties.load(fileInputStream);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		} finally {
+			try {
+				fileInputStream.close();
+			} catch (IOException e) {
+			}
+		}
+		wwwDir = (String) properties.get("wwwRoot");
+		workerThread = (String) properties.get("workerThread");
+
+		Set<Entry<Object, Object>> prop = properties.entrySet();
+		for (Entry<Object, Object> e : prop) {
+			String name = (String) e.getKey();
+			if (!name.startsWith("alias.")) {
+				continue;
+			}
+			String[] fix_value = name.split("\\.");
+			alias.addAlia(fix_value[1], (String) e.getValue());
+		}
 	}
 
 	public void destory() {
 	}
-	
-	public void doFilters(HttpProccesser proccesser,HttpRequest request,HttpResponse response) throws IOException{
-		for(HttpFilter filter :filters){
-			filter.filt(this, request, response);
-		}
-		proccesser.destory();
-	}
-	
-	//////////////////////////////////
 
+	public WebAppContext mappingAppContext(String url) {
+		return alias.getWebApp(url);
+	}
+
+	public String getWwwDir() {
+		return wwwDir;
+	}
 }

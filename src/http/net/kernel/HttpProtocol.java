@@ -1,10 +1,11 @@
 package http.net.kernel;
 
+import http.HttpProccesser;
+import http.app.HttpResponse;
 import http.base.SimpleHttpRequest;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 
 public class HttpProtocol  {
 	
@@ -68,10 +69,8 @@ public class HttpProtocol  {
 		return request;
 	}
 
-	public ByteBuffer encode(IOService service, Socket session,
-			XBuffer response) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public void encode(Socket session,HttpResponse response) throws IOException {
+		response.serialize(session.getOutputStream());
 	}
 	
 }

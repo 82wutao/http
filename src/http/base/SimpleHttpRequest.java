@@ -4,6 +4,7 @@ import http.app.Cookie;
 import http.app.HttpRequest;
 import http.net.kernel.XBuffer;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -17,11 +18,11 @@ public class SimpleHttpRequest implements HttpRequest {
 	private Map<String, String> param_map = new HashMap<String, String>();
 
 	Socket channel;
-	private XBuffer bodyBegin ;
+	private XBuffer bodyBegin;
 	private long readedFromBody = 0;
 
 	public SimpleHttpRequest(Socket channel) {
-		this.channel=channel;
+		this.channel = channel;
 	}
 
 	@Override
@@ -60,30 +61,34 @@ public class SimpleHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public int readFromBody(byte[] buffer, int off, int length) {
-//		int chunks = body.size();
-//		if (bodyChunkIndex == chunks) {
-//			return -1;
-//		}
-//
-//		XBuffer chunk = body.get(bodyChunkIndex);
-//		int chunk_off = chunk.getPosition();
-//		int chunk_limit = chunk.getLimit();
-//		int chunk_size = chunk_limit - chunk_off;
-//		byte[] chunk_data = chunk.getData();
-//
-//		if (chunk_size <= length) {
-//			length = chunk_size;
-//		}
-//		System.arraycopy(chunk_data, chunk_off, buffer, off, length);
-//		chunk.setPosition(chunk_off + length);
-//		if ((chunk_off + length) == chunk_limit) {
-//			bodyChunkIndex++;
-//		}
-//
-//		int readed = length;
-//		readedFromBody += readed;
-		return 0;//readed;
+	public int readFromBody(byte[] buffer, int off, int length)
+			throws IOException {
+		String contentLength=getContentLength();
+		if (contentLength==null
+				||contentLength.equals("0")) {
+			return 0;
+		}
+		if (readedFromBody==Integer.parseInt(contentLength)) {
+			return 0;
+		}
+		int pos = bodyBegin.getPosition();
+		int limit = bodyBegin.getLimit();
+
+		if (pos < limit) {
+			byte[] data = bodyBegin.getData();
+			int data_size = limit - pos;
+			if (data_size < length) {
+				length = data_size;
+			}
+			System.arraycopy(data, pos, buffer, off, length);
+			bodyBegin.setPosition(pos + length);
+			
+			readedFromBody+=length;
+			return length;
+		}
+		int readed = this.channel.getInputStream().read(buffer, off, length);
+		readedFromBody+=readed;
+		return readed;
 	}
 
 	public void setHead(XBuffer buffer) {
@@ -107,11 +112,11 @@ public class SimpleHttpRequest implements HttpRequest {
 			String[] kv = fields[i].split(":");
 			head_map.put(kv[0], kv[1]);
 		}
-		
+
 	}
 
 	public void bodyBegin(XBuffer buffer) {
-		bodyBegin=buffer;
+		bodyBegin = buffer;
 	}
 
 	@Override
@@ -121,16 +126,15 @@ public class SimpleHttpRequest implements HttpRequest {
 
 	@Override
 	public String dumpBody() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public void parseParamers() {
-		String method =getRequestMethod();
+		String method = getRequestMethod();
 		if (method.trim().equals("GET")) {
-			
+
 			String uri = getRequestUri();
-			
+
 			int index = uri.indexOf('?');
 			if (index == -1) {
 				return;
@@ -147,10 +151,8 @@ public class SimpleHttpRequest implements HttpRequest {
 				String[] kv = params[i].split("=");
 				param_map.put(kv[0], kv[1]);
 			}
-			return ;
+			return;
 		}
-		
-		
 
 	}
 
