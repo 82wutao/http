@@ -1,0 +1,67 @@
+
+An HTTP request is a class consisting of HTTP style requests, request lines, request methods, request URL, header fields, and body content. The most common methods that are used by a client in an HTTP request are as follows:-
+
+1) GET:- Used when the client is requesting a resource on the Web server.
+当客户端请求服务器上的资源时使用GET
+2) HEAD:- Used when the client is requesting some information about a resource but not requesting the resource itself.
+当客户端请求服务器上的资源的信息时,而不是资源本身时,使用HEAD
+3) POST:- Used when the client is sending information or data to the server—
+for example, filling out an online form (i.e. Sends a large amount of complex data to the Web Server).
+当客户端发送信息或数据到服务器时使用POST
+比如:填写在线的表单
+4) PUT:- Used when the client is sending a replacement document or uploading a new document to the Web server under the request URL.
+当客户端发送文档用以更新或者上传新文档到服务器
+5) DELETE:- Used when the client is trying to delete a document from the Web server, identified by the request URL.
+当客户端尝试删除服务器上的文档,通过url确定文档
+6) TRACE:- Used when the client is asking the available proxies or intermediate servers changing the request to announce themselves.
+TRACE方法被用于激发一个远程的,应用层的请求消息回路
+(译注:TRACE方法让客户端测试到服务器的网络通路,回路的意思如发送一个请返回一个响应,这就是一个请求响应回路,)。
+最后的接收者也许是源服务器,也许是接收到包含Max-Forwards头域值为0请求的代理或网关。
+TRACE请求不能包含一个实体。
+TRACE方法允许客户端去了解数据被请求链的另一端接收的情况,并且利用那些数据信息去测试或诊断。
+Via头域值(见14.45)有特殊的用途,因为它可以作为请求链的跟踪信息。利用Max-Forwards头域允许客户端限制请求链的长度,
+这是非常有用的,因为可以利用此去测试代理链在无限循环里转发消息。
+
+如果请求是有效的,响应应该在实体主体里包含整个请求消息,并且响应应该包含一个Content-Type头域值为”message/http”的头域。此方法的响应不能被缓存。
+7) OPTIONS:- Used when the client wants to determine other available methods to retrieve or process a document on the Web server. 
+当客户端需要确定什么方法来收回或者处理文档时使用OPTIONS
+8) CONNECT:- Used when the client wants to establish a transparent connection to a remote host, usually to facilitate SSL-encrypted communication (HTTPS) through an HTTP proxy.
+
+-----------------------------------------------------------------------------------------
+The GET Request Method
+
+The GET method is the simplest and the most frequently used request method. It is used to access the static resources, such as HTML documents and images. GET request can be used to retrieve dynamic information by including query parameters in the request URL. For instance, we can send a parameter name with the URL, such as http://www.domain.com?name=Harsh. In this example, Harsh is the dynamic information sent by including a parameter,name, in the request URL. The Web Server can then access this dynamic information through the “name” parameter.
+-----------------------------------------------------------------------------------------
+The HEAD Request Method
+
+According to Wikipedia “Asks for the response identical to the one that would correspond to a GET request, but without the response body. This is useful for retrieving meta-information written in response headers, without having to transport the entire content.” It is used when the client is requesting some information about a resource but not requesting the resource itself. This means that we have a faster way of checking the headers and some server info for a given resource on the server i.e. checking if a given url is serviceable, a given file exists, etc..Sometimes client might only need to view the header of a response (Content-Type or Content-Length). The client can use the HEAD request method to retrieve the header in such cases. The HEAD method is similar to GET method, except that the server does not return a message body (actual page) in response of the HEAD method.
+-----------------------------------------------------------------------------------------
+The POST Request Method
+
+The Post method is commonly used for accessing dynamic resources or when a large amount of complex information is to be sent to the server. The Web Server accepts the entity enclosed in the request as a new subordinate of the resource identified by the Request-URI( Uniform Resource Identifier). According to Wikipedia “Submits data to be processed (e.g., from an HTML form) to the identified resource. The data is included in the body of the request. This may result in the creation of a new resource or the updates of existing resources or both.” The major difference between GET and POST is that in GET the request parameters are transmitted as a query string appended to the request URL, while in POST the request parameters are transmitted within the body of the request.
+The POST request method provides the following functionalities:-
+1) Providing annotations of the existing resources.
+2) Posting a message to a bulletin board, newsgroup, mailing list, or a similar group of articles.
+3) Providing a block of data, such as the result of the submitting a form, to a data-handling process.
+4) Extending a database through an append operation.
+-----------------------------------------------------------------------------------------
+The PUT Request method
+
+The PUT method stores an entity in the specified Request-URI. The entity is a resource residing on the Web server under the specified Request-URI. If the Request-URI does not point to an existing resource, but is capable of being defined as a new resource by the requesting user, the Web Server can create the resource with that URI. If an existing resource is modified, either the 200(OK) or 204 (No Content) response code should be sent to indicate successful modification of a resource. The Web Server must inform the user via the 201 (Created) responses if a new resource is created. If the resource is not created or modified with the Request-URI, an appropriate error response is generated, which reflects the nature of the problem.
+-----------------------------------------------------------------------------------------
+The DELETE Request method
+
+The DELETE method requests the Web server to delete the resource identified by the Request-URI. This method may be overridden by human intervention (or other means) on the Web Server. If the response includes an entity describing the status of deletion, the 200(OK) response code specifies that the resource has been deleted successfully. If the response is 202(Accepted), it specifies that the resource has not yet been deleted. Similarly, if the response code is 204 ( No Content), it specifies that the resource has been deleted but the response code does not include an entity.
+-----------------------------------------------------------------------------------------
+The OPTIONS Request method
+
+According to Wikipedia “Returns the HTTP methods that the server supports for specified URL. This can be used to check the functionality of a web server by requesting '*' instead of a specific resource.”
+The OPTION method requests for information about the communication options available on the request/response chain identified by a Request-URI. Responses to this method are not cacheable. This method allows the client to determine the options and /or requirements associated with a resource, or the capabilities of a server. If the OPTIONS method includes an entity body, the media type must be indicated by the content-type field.
+-----------------------------------------------------------------------------------------
+The TRACE Request method
+
+According to Wikipedia “Echoes back the received request, so that a client can see what (if any) changes or additions have been made by intermediate servers.”
+The TRACE method is used to invoke a remote application layer associated with a request message. A TRACE request must not include an entity. A client uses the TRACE method to see the received input at the other end of the request chain and diagnostic or testing information.
+
+关于http协议涉及方法的两个名词解释：safe型方法和Idempotent型方法。
+safe型方法通常是指不影响服务器端资源的行为.它的操作结果仅仅是读取信息，GET和HEAD多数情况下被认为具有“safe”的特性。

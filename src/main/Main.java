@@ -8,13 +8,14 @@ import http.net.kernel.NetworkConfig;
 import java.io.IOException;
 
 public class Main {
-public static void main(String[] args) throws IOException {
-	HttpServerContext serverContext=new HttpServerContext();
-	
-	NetworkConfig config=new NetworkConfig("",8090, new HttpProtocol());
-	IOService service=new IOService(serverContext);
-	service.configure(config);
+	public static void main(String[] args) throws IOException {
+		HttpServerContext serverContext = new HttpServerContext();
+		serverContext.initial("conf.txt");
 
-	service.startListen();
-}
+		NetworkConfig config = new NetworkConfig("", 8090, new HttpProtocol());
+		IOService service = new IOService(serverContext);
+		service.configure(config);
+
+		service.startListen();
+	}
 }
