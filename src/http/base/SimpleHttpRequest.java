@@ -5,7 +5,9 @@ import http.app.HttpRequest;
 import http.net.kernel.XBuffer;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,7 +93,7 @@ public class SimpleHttpRequest implements HttpRequest {
 		return readed;
 	}
 
-	public void setHead(XBuffer buffer) {
+	public void setHead(XBuffer buffer) throws UnsupportedEncodingException {
 		header = buffer;
 		int off = header.getPosition();
 		int limit = header.getLimit();
@@ -104,6 +106,7 @@ public class SimpleHttpRequest implements HttpRequest {
 		String[] fields = str.split("\r\n");
 		String[] method_uri_version = fields[0].split(" ");
 		head_map.put(HttpRequest.Head_METHOD_Request, method_uri_version[0]);
+		method_uri_version[1] = URLDecoder.decode(method_uri_version[1], "UTF-8");
 		head_map.put(HttpRequest.Head_Uri_Request, method_uri_version[1]);
 		head_map.put(HttpRequest.Head_HttpVersion_Request,
 				method_uri_version[2]);
@@ -129,7 +132,7 @@ public class SimpleHttpRequest implements HttpRequest {
 		return null;
 	}
 
-	public void parseParamers() {
+	public boolean parseParamers() throws IOException {
 		String method = getRequestMethod();
 		if (method.trim().equals("GET")) {
 
@@ -137,23 +140,57 @@ public class SimpleHttpRequest implements HttpRequest {
 
 			int index = uri.indexOf('?');
 			if (index == -1) {
-				return;
+				return true;
 			}
 			String[] uri_params = uri.split("\\?");
 			if (uri_params.length == 1) {
-				return;
+				return true;
 			}
+			
+			head_map.put(HttpRequest.Head_Uri_Request, uri_params[0]);
+			
 			if (uri_params[1].equals("")) {
-				return;
+				return true;
 			}
 			String[] params = uri_params[1].split("&");
 			for (int i = 0; i < params.length; i++) {
 				String[] kv = params[i].split("=");
 				param_map.put(kv[0], kv[1]);
 			}
-			return;
+			return true;
 		}
+		
+		if (method.trim().equals("POST")) {
+			String contentTypeHeader = head_map.get(Head_ContentType_Request);
+			String contentLengthHeader=head_map.get(Head_ContentLength_Request);
+			
+			if (contentTypeHeader.trim().equals("application/x-www-form-urlencoded")) {
+				int length = Integer.parseInt(contentLengthHeader);
+				
+				byte[] content =new byte[length];
+				int begin = bodyBegin.getPosition();
+				int limit = bodyBegin.getLimit();
 
+				int copied = limit - begin;
+				System.arraycopy(bodyBegin.getData(),begin,content,0,copied);
+				if(copied!=length){
+					this.channel.getInputStream().read(content,copied, length-(copied));
+				}
+				
+				String param= new String(content,Charset.forName("ASCII"));
+				param =URLDecoder.decode(param, "UTF-8");
+				String[] params = param.split("&");
+				for (int i = 0; i < params.length; i++) {
+					String[] kv = params[i].split("=");
+					param_map.put(kv[0], kv[1]);
+				}
+			}else if (contentTypeHeader.trim().equals("multipart/form-data") ){
+				
+			}
+			
+			return true;
+		}
+		return true;
 	}
 
 	@Override

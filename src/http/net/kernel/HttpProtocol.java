@@ -25,7 +25,7 @@ public class HttpProtocol  {
 			if (ch=='\n') {
 				
 				if (buffer[index+2]=='\n') {
-					return index;
+					return (index-1);
 				}
 			}
 			index++;

@@ -41,6 +41,8 @@ public class HttpProccesser implements Runnable {
 		}
 		if (exception == null) {
 			try {
+				request.parseParamers();
+				
 				String uri = request.getRequestUri();
 				WebAppContext appContext = context.mappingAppContext(uri);
 				appContext.doService(request, response);
