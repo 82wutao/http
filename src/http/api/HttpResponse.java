@@ -1,4 +1,4 @@
-package http.app;
+package http.api;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +27,7 @@ public interface HttpResponse {
 	public void setResponseHead(String key, String value) ;
 	public void setResponseHeads(Map<String, String> heads);
 
+	public void setHttpVersion(String version);
 	public void setStatusCode(int code);
 	public void setContentType(String type);
 	public void setContentLength(long lenght);

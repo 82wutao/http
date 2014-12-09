@@ -2,7 +2,7 @@ package http.net.kernel;
 
 
 import http.HttpProccesser;
-import http.HttpServerContext;
+import http.api.ServerContext;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,9 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * 网络服务的核心实现，基于JDK NIO特性。 维护一个session的集合。有新连接即加入，连接关闭即移除。
- * 有IO事件发生，记录在相应的数组中，最后批量处理。 根据异步参数，最后的处理可能为同步执行，也有可能为线程池内并发执行。
- * 
  * @author wt
  * 
  */
@@ -25,10 +22,10 @@ public class IOService implements Runnable {
 	private boolean running = false;
 
 	private ExecutorService executor = null;
-	private HttpServerContext serverContext=null;
+	private ServerContext serverContext=null;
 
 	
-	public IOService(HttpServerContext serverContext) {
+	public IOService(ServerContext serverContext) {
 		this.serverContext=serverContext;
 	}
 

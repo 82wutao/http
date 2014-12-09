@@ -1,8 +1,7 @@
 package http.base;
 
-import http.HttpServerContext;
-import http.app.WebAppContext;
-import http.base.SimpleWebAppContext;
+import http.api.ServerContext;
+import http.api.WebAppContext;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,13 +9,13 @@ import java.util.List;
 
 public class Alias {
 	WebAppContext staticDocumentContext=null;
-	HttpServerContext serverContext=null;
+	ServerContext serverContext=null;
 	
 	List<String> naming = new ArrayList<String>();
 	List<String> diskDirs = new ArrayList<String>();
 	List<WebAppContext> apps = new ArrayList<WebAppContext>();
 
-	public Alias(HttpServerContext serverContext ) {
+	public Alias(ServerContext serverContext ) {
 		this.serverContext=serverContext;
 		staticDocumentContext=new SimpleWebAppContext(serverContext, "/",serverContext.getWwwDir());
 	}

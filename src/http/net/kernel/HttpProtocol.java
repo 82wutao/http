@@ -1,7 +1,7 @@
 package http.net.kernel;
 
 import http.HttpProccesser;
-import http.app.HttpResponse;
+import http.api.HttpResponse;
 import http.base.SimpleHttpRequest;
 
 import java.io.IOException;
