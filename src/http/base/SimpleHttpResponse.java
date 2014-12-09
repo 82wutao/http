@@ -123,7 +123,9 @@ public void setHttpVersion(String version) {
 				outputStream.write(text.getBytes("UFT-8"));
 			}
 		}
-		byte[] buffer = new byte[1024];
+		if (document!=null
+				&&document.exists()) {
+					byte[] buffer = new byte[1024];
 		FileInputStream inputStream = new FileInputStream(document);
 		try{
 			for (int readed  = inputStream.read(buffer,0,1024); readed  >0;readed  = inputStream.read(buffer,0,1024) ) {
@@ -132,5 +134,7 @@ public void setHttpVersion(String version) {
 		}finally{
 			inputStream.close();
 		}
+		}
+
 	}
 }
