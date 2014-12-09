@@ -1,8 +1,6 @@
-package http.app;
+package http.api;
 
 import java.io.File;
-
-import http.HttpServerContext;
 
 public class WebAppContext {
 	
@@ -18,7 +16,7 @@ public class WebAppContext {
 		return "";
 	}
 
-	public HttpServerContext getServerContext() {
+	public ServerContext getServerContext() {
 		return null;
 	}
 
