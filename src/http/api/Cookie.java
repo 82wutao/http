@@ -1,4 +1,4 @@
-package http.app;
+package http.api;
 
 import java.io.Serializable;
 

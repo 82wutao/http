@@ -1,4 +1,4 @@
-package http.app;
+package http.api;
 
 import java.io.IOException;
 import java.util.Map;

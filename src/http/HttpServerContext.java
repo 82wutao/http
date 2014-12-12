@@ -7,10 +7,11 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import http.app.WebAppContext;
+import http.api.ServerContext;
+import http.api.WebAppContext;
 import http.base.Alias;
 
-public class HttpServerContext {
+public class HttpServerContext implements ServerContext {
 	String wwwDir;
 	String workerThread;
 	Alias alias = null;
@@ -19,8 +20,11 @@ public class HttpServerContext {
 	alias=	new Alias(this);
 	}
 
-	public void initial(String conf) {
-		File file = new File(conf);
+	/* (non-Javadoc)
+	 * @see http.HttpServletContext#initial(java.lang.String)
+	 */
+	@Override
+	public void initial(File file) {
 		if (!file.exists()) {
 			System.exit(1);
 		}
@@ -52,13 +56,25 @@ public class HttpServerContext {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see http.HttpServletContext#destory()
+	 */
+	@Override
 	public void destory() {
 	}
 
+	/* (non-Javadoc)
+	 * @see http.HttpServletContext#mappingAppContext(java.lang.String)
+	 */
+	@Override
 	public WebAppContext mappingAppContext(String url) {
 		return alias.getWebApp(url);
 	}
 
+	/* (non-Javadoc)
+	 * @see http.HttpServletContext#getWwwDir()
+	 */
+	@Override
 	public String getWwwDir() {
 		return wwwDir;
 	}

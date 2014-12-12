@@ -1,7 +1,7 @@
 package http.base;
 
-import http.app.Cookie;
-import http.app.HttpRequest;
+import http.api.Cookie;
+import http.api.HttpRequest;
 import http.net.kernel.XBuffer;
 
 import java.io.IOException;

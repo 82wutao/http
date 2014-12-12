@@ -1,6 +1,7 @@
 package http;
 
-import http.app.WebAppContext;
+import http.api.ServerContext;
+import http.api.WebAppContext;
 import http.base.SimpleHttpRequest;
 import http.base.SimpleHttpResponse;
 import http.net.kernel.HttpProtocol;
@@ -13,9 +14,9 @@ public class HttpProccesser implements Runnable {
 	private Socket client = null;
 	public XBuffer buffer = null;
 	HttpProtocol protocol = null;
-	HttpServerContext context = null;
+	ServerContext context = null;
 
-	public HttpProccesser(HttpServerContext serverContext, Socket socket,
+	public HttpProccesser(ServerContext serverContext, Socket socket,
 			HttpProtocol protocol, int capacity) {
 		client = socket;
 		buffer = new XBuffer(capacity);
@@ -26,10 +27,8 @@ public class HttpProccesser implements Runnable {
 	@Override
 	public void run() {
 		SimpleHttpRequest request = null;
-		SimpleHttpResponse response = new SimpleHttpResponse("HTTP/1.1");
-
 		Exception exception = null;
-
+		SimpleHttpResponse response =null;
 		try {
 			request = protocol.decode(client, this);
 			while (request == null) {
@@ -37,18 +36,33 @@ public class HttpProccesser implements Runnable {
 			}
 		} catch (IOException e) {
 			exception = e;
-			response.setStatusCode(400);
+			response = new SimpleHttpResponse(null);
+			response.setHttpVersion("HTTP/1.1");
+			response.setStatusCode(404);
+			response.setContentType("text/html");
+			response.write("<html><head><title>Not founded</title></head><body>Not founded</body></html>");
 		}
+		
+
+		
 		if (exception == null) {
 			try {
 				request.parseParamers();
 				
 				String uri = request.getRequestUri();
 				WebAppContext appContext = context.mappingAppContext(uri);
+				
+				response=new SimpleHttpResponse(appContext);
+				response.setHttpVersion("HTTP/1.1");
+				
 				appContext.doService(request, response);
 			} catch (Exception e) {
 				exception = e;
+				response = new SimpleHttpResponse(null);
+				response.setHttpVersion("HTTP/1.1");
 				response.setStatusCode(500);
+				response.setContentType("text/html");
+				response.write("<html><head><title>Not founded</title></head><body>Not founded</body></html>");
 			}
 		}
 
