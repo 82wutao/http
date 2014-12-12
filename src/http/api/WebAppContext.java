@@ -2,27 +2,16 @@ package http.api;
 
 import java.io.File;
 
-public class WebAppContext {
+public interface WebAppContext {
 	
-	public void initial(File config) {
+	public void initial(File config) ;
 
-	}
+	public String getContextPath() ;
 
-	public String getContextPath() {
-		return "";
-	}
+	public String getContextFileSystemPath() ;
 
-	public String getContextFileSystemPath() {
-		return "";
-	}
+	public ServerContext getServerContext();
 
-	public ServerContext getServerContext() {
-		return null;
-	}
-
-	public void doService(HttpRequest request, HttpResponse response) {
-	}
-	public String mimeType(String resourceType) {
-		return null;
-	}
+	public void doService(HttpRequest request, HttpResponse response) ;
+	public String mimeType(String resourceType) ;
 }

@@ -1,6 +1,7 @@
 package http.base;
 
 import http.api.Cookie;
+import http.api.FileAppendix;
 import http.api.HttpRequest;
 import http.net.kernel.XBuffer;
 
@@ -184,7 +185,18 @@ public class SimpleHttpRequest implements HttpRequest {
 					String[] kv = params[i].split("=");
 					param_map.put(kv[0], kv[1]);
 				}
-			}else if (contentTypeHeader.trim().equals("multipart/form-data") ){
+			}else if (contentTypeHeader.trim().startsWith("multipart/form-data") ){
+				String[] type_split= contentTypeHeader.trim().split(";");
+				String boundary=type_split[1].trim();
+				byte[] boundaryBytes=boundary.getBytes("ASCII");
+				
+				int begin = bodyBegin.getPosition();
+				int limit = bodyBegin.getLimit();
+				int left = limit - begin;
+				
+				if (condition) {
+					
+				}
 				
 			}
 			
@@ -195,6 +207,10 @@ public class SimpleHttpRequest implements HttpRequest {
 
 	@Override
 	public Cookie[] getCookies() {
+		return null;
+	}
+	@Override
+	public FileAppendix hasFile() {
 		return null;
 	}
 }

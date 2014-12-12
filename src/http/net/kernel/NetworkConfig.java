@@ -1,5 +1,7 @@
 package http.net.kernel;
 
+import http.net.HttpProtocol;
+
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 

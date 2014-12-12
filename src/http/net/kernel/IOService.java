@@ -37,7 +37,7 @@ public class IOService implements Runnable {
 		networkConfig = config;
 		running = true;
 
-		executor = Executors.newCachedThreadPool();
+		executor = Executors.newFixedThreadPool(serverContext.getWorkerThreads());
 	}
 
 	public void startListen() {

@@ -42,4 +42,6 @@ public interface HttpRequest {
 	public String dumpHead();
 
 	public String dumpBody();
+	
+	public FileAppendix hasFile();
 }

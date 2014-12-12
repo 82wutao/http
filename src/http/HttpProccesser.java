@@ -4,7 +4,7 @@ import http.api.ServerContext;
 import http.api.WebAppContext;
 import http.base.SimpleHttpRequest;
 import http.base.SimpleHttpResponse;
-import http.net.kernel.HttpProtocol;
+import http.net.HttpProtocol;
 import http.net.kernel.XBuffer;
 
 import java.io.IOException;

@@ -2,7 +2,7 @@ package main;
 
 import http.HttpServerContext;
 import http.api.ServerContext;
-import http.net.kernel.HttpProtocol;
+import http.net.HttpProtocol;
 import http.net.kernel.IOService;
 import http.net.kernel.NetworkConfig;
 

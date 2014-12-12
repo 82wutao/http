@@ -17,7 +17,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 		String filesysPath = context.getContextFileSystemPath();
 		String urlContext = context.getContextPath();
 
-		String diskFile = uri.replace(urlContext, filesysPath + "/");
+		String diskFile = uri.replaceFirst(urlContext, filesysPath + "/");
 		File doc = new File(diskFile);
 		if (!doc.exists()) {
 			response.setStatusCode(404);
