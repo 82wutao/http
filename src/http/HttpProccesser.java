@@ -58,6 +58,7 @@ public class HttpProccesser implements Runnable {
 				appContext.doService(request, response);
 			} catch (Exception e) {
 				exception = e;
+				e.printStackTrace();
 				response = new SimpleHttpResponse(null);
 				response.setHttpVersion("HTTP/1.1");
 				response.setStatusCode(500);

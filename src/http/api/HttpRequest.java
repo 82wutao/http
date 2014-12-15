@@ -36,12 +36,12 @@ public interface HttpRequest {
 
 	public Cookie[] getCookies();
 
-	public int readFromBody(byte[] buffer, int off, int length)
+	public int readFromBody(byte[] buffer)
 			throws IOException;
 
 	public String dumpHead();
 
 	public String dumpBody();
 	
-	public FileAppendix hasFile();
+	public MultiPartForm getMultiPartForm();
 }

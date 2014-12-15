@@ -346,7 +346,7 @@ public class XBuffer implements PoolableObject{
 			this.data[i] = this.data[offset + i];
 		}
 
-		this.index = offset;
+		this.index = length;
 		this.limit = this.length;
 	}
 

@@ -1,8 +1,8 @@
 package http.base;
 
 import http.api.Cookie;
-import http.api.FileAppendix;
 import http.api.HttpRequest;
+import http.api.MultiPartForm;
 import http.net.kernel.XBuffer;
 
 import java.io.IOException;
@@ -19,6 +19,7 @@ public class SimpleHttpRequest implements HttpRequest {
 	private String head_str = null;
 
 	private Map<String, String> param_map = new HashMap<String, String>();
+	private MultiPartForm multiPartForm=null;
 
 	Socket channel;
 	private XBuffer bodyBegin;
@@ -64,32 +65,46 @@ public class SimpleHttpRequest implements HttpRequest {
 	}
 
 	@Override
-	public int readFromBody(byte[] buffer, int off, int length)
+	public int readFromBody(byte[] buffer)
 			throws IOException {
+		if (this.multiPartForm!=null) {
+			return -1;
+		}
 		String contentLength=getContentLength();
 		if (contentLength==null
 				||contentLength.equals("0")) {
 			return 0;
 		}
-		if (readedFromBody==Integer.parseInt(contentLength)) {
+		if (readedFromBody==Long.parseLong(contentLength)) {
 			return 0;
 		}
+		
+		
 		int pos = bodyBegin.getPosition();
 		int limit = bodyBegin.getLimit();
 
 		if (pos < limit) {
 			byte[] data = bodyBegin.getData();
 			int data_size = limit - pos;
-			if (data_size < length) {
-				length = data_size;
+			if (data_size < buffer.length) {
+				System.arraycopy(data, pos, buffer, 0, data_size);
+				bodyBegin.setPosition(pos + data_size);
+				readedFromBody+=data_size;
+				return data_size;
 			}
-			System.arraycopy(data, pos, buffer, off, length);
-			bodyBegin.setPosition(pos + length);
-			
-			readedFromBody+=length;
-			return length;
+			System.arraycopy(data, pos, buffer, 0, buffer.length);
+			bodyBegin.setPosition(pos + buffer.length);
+			readedFromBody+=buffer.length;
+			return buffer.length;
 		}
-		int readed = this.channel.getInputStream().read(buffer, off, length);
+		
+		long data_size = Long.parseLong(contentLength) - readedFromBody;
+		if (data_size < buffer.length) {
+			int readed =this.channel.getInputStream().read(buffer, 0, (int)data_size);
+			readedFromBody+=readed;
+			return readed;
+		}
+		int readed =this.channel.getInputStream().read(buffer, 0,  buffer.length);
 		readedFromBody+=readed;
 		return readed;
 	}
@@ -187,17 +202,9 @@ public class SimpleHttpRequest implements HttpRequest {
 				}
 			}else if (contentTypeHeader.trim().startsWith("multipart/form-data") ){
 				String[] type_split= contentTypeHeader.trim().split(";");
-				String boundary=type_split[1].trim();
+				String boundary=type_split[1].trim().split("=")[1];
 				byte[] boundaryBytes=boundary.getBytes("ASCII");
-				
-				int begin = bodyBegin.getPosition();
-				int limit = bodyBegin.getLimit();
-				int left = limit - begin;
-				
-				if (condition) {
-					
-				}
-				
+				this.multiPartForm=new MultiPartForm(Long.parseLong(contentLengthHeader.trim()),boundaryBytes, bodyBegin, channel.getInputStream());
 			}
 			
 			return true;
@@ -210,7 +217,7 @@ public class SimpleHttpRequest implements HttpRequest {
 		return null;
 	}
 	@Override
-	public FileAppendix hasFile() {
-		return null;
+	public MultiPartForm getMultiPartForm() {
+		return multiPartForm;
 	}
 }
