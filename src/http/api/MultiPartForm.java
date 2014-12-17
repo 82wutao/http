@@ -7,14 +7,6 @@ import java.net.URLDecoder;
 import http.net.kernel.XBuffer;
 
 /**
- * Content-Disposition: form-data; name="myfile"; filename="23277.html"
- * Content-Type: text/html
- * 
- * bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
- * ======================================================== Content-Disposition:
- * form-data; name="content"
- * 
- * dsfsadfsadf
  * 
  * @author wutao
  *
@@ -49,8 +41,8 @@ public class MultiPartForm {
 		if (readed == bodyLength) {
 			return false;
 		}
-		if (readed + boundary.length + 2 == bodyLength) {
-			readed += boundary.length + 2;
+		if (readed + boundary.length + 6 == bodyLength) {//--~--\r\n
+			readed += boundary.length + 6;
 			return false;
 		}
 
@@ -60,7 +52,10 @@ public class MultiPartForm {
 		int limit = buffer.getLimit();
 		byte[] data = buffer.getData();
 		if (readed + begin < bodyLength) {
-			int ret = inputStream.read(data, begin, limit - begin);
+			long unreaded = bodyLength - readed;
+			long space =  limit - begin;
+			
+			int ret = inputStream.read(data, begin, (int)(space < unreaded?space:unreaded));
 			buffer.setPosition(begin + ret);			
 		}			
 
@@ -68,42 +63,41 @@ public class MultiPartForm {
 		begin = buffer.getPosition();
 		limit = buffer.getLimit();
 
-		readed += boundary.length + 4;
+		readed += boundary.length + 4;//boundary
 		buffer.setPosition(begin + boundary.length + 4);
 		begin = buffer.getPosition();
 
-		int end = readLine(data, begin, limit);
-		String desc = new String(data, begin, end - begin, "ASCII");
+		int end = readLine(data, begin, limit);//Content-Disposition
+		String desc = new String(data, begin, end - begin, "UTF8");
 		desc = URLDecoder.decode(desc, "UTF8");
-
 		readed += ((end - begin) + 2);
 		buffer.setPosition(begin + (end - begin) + 2);
 		begin = buffer.getPosition();
-
+///////////////////////////////////////////////////////////////////
 		int fileTag = desc.indexOf("filename");
 		if (fileTag == -1) {
 			this.type = MultiPartForm.Part_Paramater;
 
-			end = readLine(data, begin + 2, limit);
-			String val = new String(data, begin + 2, end - begin - 2, "ASCII");
+			end = readLine(data, begin + 2, limit);//\r\nform field value
+			String val = new String(data, begin + 2, end - begin - 2, "UTF8");
 			val = URLDecoder.decode(val, "UTF8");
-
 			readed += (end - begin) + 2;
 			buffer.setPosition(begin + (end - begin) + 2);
 
-			// Content-Disposition: form-data; name="myfile";
-			// filename="23277.html"
+			// Content-Disposition: form-data; name="myfile"; filename="23277.html"
 			String[] head_body = desc.split(":");
 			String[] fields = head_body[1].split(";");
 			String[] nameField = fields[1].split("=");
 			paramName = nameField[1].trim().substring(1,
 					nameField[1].trim().length() - 1);
 			paramValue = val;
+			partEnd=true;
+//			buffer.readyReadingFromBuffer();
 			return true;
 		}
 		this.type = MultiPartForm.Part_File;
 
-		end = readLine(data, begin + 2, limit);
+		end = readLine(data, begin, limit);//Content-Type: text/plain
 		readed += (end - begin) + 4;
 		buffer.setPosition(begin + (end - begin) + 4);
 
@@ -112,7 +106,7 @@ public class MultiPartForm {
 		String[] nameField = fields[2].split("=");
 		fileName = nameField[1].trim().substring(1,
 				nameField[1].trim().length() - 1);
-		// Content-Disposition: form-data; name="myfile"; filename="23277.html"
+		partEnd=false;
 		return true;
 	}
 
@@ -133,8 +127,12 @@ public class MultiPartForm {
 		int begin = buffer.getPosition();
 		int limit = buffer.getLimit();
 		byte[] data = buffer.getData();
+		
+
 		if (readed + begin < bodyLength) {
-			int ret = inputStream.read(data, begin, limit - begin);
+			long unreaded = bodyLength - readed;
+			long space =  limit - begin;
+			int ret = inputStream.read(data, begin, (int)(space < unreaded?space:unreaded));
 			buffer.setPosition(begin + ret);			
 		}
 		buffer.readyReadingFromBuffer();
@@ -157,17 +155,21 @@ public class MultiPartForm {
 			destBSuffer[destIndex]=data[i];
 			destIndex++;
 		}
-		if (destIndex==destSize) {
-			partEnd=false;
+
+		if (partEnd) {
+			buffer.setPosition(begin+destIndex+2);
+			readed += destIndex+2;
+		}else {
+			buffer.setPosition(begin+destIndex);
+			readed += destIndex;
 		}
-		buffer.setPosition(begin+destIndex);
 		return destIndex;
 	}
 
 	private int readLine(byte[] data, int begin, int limit) {
 		for (int i = begin; i < limit; i++) {
 			if (data[i] == '\r' && data[i + 1] == '\n') {
-				return i - 1;
+				return i ;
 			}
 		}
 		return -1;
@@ -193,12 +195,25 @@ public class MultiPartForm {
 	 */
 	private int isBoundary(byte[] bodyData,int testBegin,int limit){
 		int testLength =limit-testBegin;
-		if (testLength<boundary.length) {
+		if (testLength<boundary.length+4) {
 			return 0;
 		}
 		
-		for (int i = testBegin; i < boundary.length; i++) {
-			if (bodyData[i]!=boundary[i-testBegin]) {
+		if (bodyData[testBegin]!='\r') {
+			return -1;
+		}
+		if (bodyData[testBegin+1]!='\n') {
+			return -1;
+		}
+		if (bodyData[testBegin+2]!='-') {
+			return -1;
+		}
+		if (bodyData[testBegin+3]!='-') {
+			return -1;
+		}
+		testBegin += 4;
+		for (int i = 0; i < boundary.length; i++) {
+			if (bodyData[i+testBegin]!=boundary[i]) {
 				return -1;
 			}
 		}

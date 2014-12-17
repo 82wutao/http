@@ -70,6 +70,7 @@ public class HttpProccesser implements Runnable {
 		try {
 			protocol.encode(client, response);
 		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		try {
 			client.close();

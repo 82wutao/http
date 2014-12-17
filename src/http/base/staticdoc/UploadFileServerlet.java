@@ -50,7 +50,7 @@ public class UploadFileServerlet implements HttpServerlet {
 						while(readed!=-1){
 							outputStream.write(buff, 0, readed);
 							readed = multiPartForm.read(buff);
-						}						
+						}
 					} catch (Exception e) {
 						throw e;
 					}finally{
@@ -62,6 +62,8 @@ public class UploadFileServerlet implements HttpServerlet {
 				}
 					
 			}
+			response.setStatusCode(200);
+			response.write("good");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
