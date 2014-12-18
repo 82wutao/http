@@ -10,7 +10,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.print.attribute.standard.Media;
 
 public class SimpleWebAppContext implements WebAppContext {
 	ServerContext serverContext;

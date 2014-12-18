@@ -13,5 +13,7 @@ public interface ServerContext {
 	public abstract String getWwwDir();
 	public abstract int getWorkerThreads();
 	public abstract String getMimeType(String resourceType);
+	
+	public abstract String getContextAttribute(String key);
 
 }

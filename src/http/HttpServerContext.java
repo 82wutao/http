@@ -14,12 +14,11 @@ import http.api.WebAppContext;
 import http.base.Alias;
 
 public class HttpServerContext implements ServerContext {
-	private String wwwDir;
-	private String workerThread;
 	private Alias alias = null;
 
 	private Map<String, String> mimes = new HashMap<String, String>();
-
+	private Properties attributes=null;
+	
 	public HttpServerContext() {
 
 	}
@@ -43,9 +42,9 @@ public class HttpServerContext implements ServerContext {
 			} catch (IOException e) {
 			}
 		}
-		wwwDir = (String) properties.get("wwwRoot");
-		workerThread = (String) properties.get("workerThread");
 
+		this.attributes = properties;
+		
 		alias = new Alias(this);
 		Set<Entry<Object, Object>> prop = properties.entrySet();
 		for (Entry<Object, Object> e : prop) {
@@ -437,16 +436,21 @@ public class HttpServerContext implements ServerContext {
 	 */
 	@Override
 	public String getWwwDir() {
-		return wwwDir;
+		return 	attributes.getProperty("wwwRoot");
 	}
 
 	@Override
 	public int getWorkerThreads() {
+		String workerThread=attributes.getProperty("workerThread");
 		return Integer.parseInt(workerThread);
 	}
 
 	@Override
 	public String getMimeType(String resourceType) {
 		return mimes.get(resourceType);
+	}
+	@Override
+	public String getContextAttribute(String key) {
+		return attributes.getProperty(key);
 	}
 }

@@ -3,6 +3,7 @@ package http.base;
 import http.api.Cookie;
 import http.api.HttpResponse;
 import http.api.WebAppContext;
+import io.XBuffer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,12 +24,15 @@ public class SimpleHttpResponse implements HttpResponse {
 	String statusCode = "200";
 
 	private File document = null;
+	private XBuffer buffer=null;
+	
 	private List<String> content = new ArrayList<String>();
 
 	private WebAppContext appContext = null;
 
-	public SimpleHttpResponse(WebAppContext appContext) {
+	public SimpleHttpResponse(WebAppContext appContext,XBuffer outBuffer) {
 		this.appContext = appContext;
+		buffer = outBuffer;
 	}
 
 	@Override
@@ -125,16 +129,24 @@ public class SimpleHttpResponse implements HttpResponse {
 
 		if (!content.isEmpty()) {
 			for (String text : content) {
+				if (text==null) {
+					continue;
+				}
+				if (text.equals("")) {
+					continue;
+				}
 				outputStream.write(text.getBytes("UTF-8"));
 			}
 		}
 		if (document != null && document.exists()) {
-			byte[] buffer = new byte[1024];
+			byte[] array=buffer.getData();
+			int length = array.length;
+			
 			FileInputStream inputStream = new FileInputStream(document);
 			try {
-				for (int readed = inputStream.read(buffer, 0, 1024); readed > 0; readed = inputStream
-						.read(buffer, 0, 1024)) {
-					outputStream.write(buffer, 0, readed);
+				for (int readed = inputStream.read(array, 0, length); readed > 0; readed = inputStream
+						.read(array, 0, length)) {
+					outputStream.write(array, 0, readed);
 				}
 			} finally {
 				inputStream.close();

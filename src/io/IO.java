@@ -35,7 +35,7 @@ public class IO {
 		stringOutput.readyReadingFromBuffer();
 		int length = stringOutput.getLimit();
 		if (length == 0) {
-			return "";
+			return null;
 		}
 		String string = new String(stringOutput.getData(), 0, length,
 				Charset.forName(encode));

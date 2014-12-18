@@ -36,7 +36,7 @@ public class HttpProccesser implements Runnable {
 			}
 		} catch (IOException e) {
 			exception = e;
-			response = new SimpleHttpResponse(null);
+			response = new SimpleHttpResponse(null,this.buffer);
 			response.setHttpVersion("HTTP/1.1");
 			response.setStatusCode(404);
 			response.setContentType("text/html");
@@ -52,14 +52,14 @@ public class HttpProccesser implements Runnable {
 				String uri = request.getRequestUri();
 				WebAppContext appContext = context.mappingAppContext(uri);
 				
-				response=new SimpleHttpResponse(appContext);
+				response=new SimpleHttpResponse(appContext,buffer);
 				response.setHttpVersion("HTTP/1.1");
 				
 				appContext.doService(request, response);
 			} catch (Exception e) {
 				exception = e;
 				e.printStackTrace();
-				response = new SimpleHttpResponse(null);
+				response = new SimpleHttpResponse(null,buffer);
 				response.setHttpVersion("HTTP/1.1");
 				response.setStatusCode(500);
 				response.setContentType("text/html");

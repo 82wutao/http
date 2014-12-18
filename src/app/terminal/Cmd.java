@@ -19,20 +19,52 @@ public class Cmd {
 		instance = obj;
 	}
 
+	public String execute(String cmd, String outEncode) throws IOException,
+			InterruptedException {
 
-	public String execute(String cmd,String outEncode) throws IOException, InterruptedException {
-		Process process = Runtime.getRuntime().exec(cmd);
+		InputStream out = null;
+		InputStream error = null;
 
-		process.waitFor();
+		try {
+			Process process = null;
+			process = Runtime.getRuntime().exec(cmd);
+			process.waitFor();
 
-		InputStream out = process.getInputStream();
-		String outMsg = IO.getInstance().readMessageFromStream(out,outEncode);
+			out = process.getInputStream();
+			error = process.getErrorStream();
 
-		InputStream error = process.getErrorStream();
-		String errorMsg = IO.getInstance().readMessageFromStream(error,outEncode);
-		
-		System.out.println("STD_OUT:\n"+outMsg+"\n\nSTD_ERR:\n"+errorMsg);
-		return "STD_OUT:\n"+outMsg+"\n\nSTD_ERR:\n"+errorMsg;
+			String outMsg = IO.getInstance().readMessageFromStream(out,
+					outEncode);
+			String errorMsg = IO.getInstance().readMessageFromStream(error,
+					outEncode);
+
+			String ret = null;
+			if (outMsg != null) {
+				ret = outMsg;
+			}
+
+			if (ret == null) {
+				if (errorMsg != null) {
+					ret = errorMsg;
+				}
+				return ret;
+			}
+
+			if (errorMsg != null) {
+				ret = ret + "\n\n" + errorMsg;
+			}
+			return ret;
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if (out!=null) {
+				out.close();
+			}
+			if(error!=null){
+				error.close();
+			}
+		}
+
 	}
 
 }
