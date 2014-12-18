@@ -1,6 +1,6 @@
-wwwRoot=/home/gameboy/programes/tools/webapp/
+wwwRoot=/home/gameboy/programes/tools/webapp
 workerThread=10
-upload=/home/gameboy/programes/tools/webapp/scripts/
+upload=/home/gameboy/programes/tools/webapp/scripts
 
 
 #alias.name=/home/wutao/test

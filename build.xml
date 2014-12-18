@@ -33,6 +33,6 @@
 		</copy>
 		<copydir dest="dest/main" src="${tar}/main"></copydir>
 		<jar destfile="dest/lib/tools.jar" basedir="${tar}" />
-		<zip destfile="dest.zip" basedir="dest/"/>
+		<zip destfile="dest.zip" basedir="dest/" />
 	</target>
 </project>

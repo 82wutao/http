@@ -98,7 +98,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 					byte[] buff =new byte[512];
 					String name = multiPartForm.getFileName();
 					
-					File file=new File(context.getContextFileSystemPath()+"/scripts/"+name);
+					File file=new File(context.getContextAttribute("upload")+"/"+name);
 					OutputStream outputStream = new FileOutputStream(file);
 					
 					try {
@@ -160,7 +160,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 			HttpResponse response){
 		String cmd = request.getParamerValue("script");
 		response.setContentType("text/html");
-		response.write("<html><head><title>"+cmd+"</title></head><body>");//输出数据
+		response.write("<html><head><meta charset=\"UTF-8\"><title>"+cmd+"</title></head><body>");//输出数据
 		Exception exception=null;
 		try{
 			String appContext=context.getContextFileSystemPath();

@@ -77,6 +77,6 @@ public class SimpleWebAppContext implements WebAppContext {
 	}
 	@Override
 	public String getContextAttribute(String param) {
-		return null;
+		return serverContext.getContextAttribute(param);
 	}
 }
