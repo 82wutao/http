@@ -1,10 +1,10 @@
 package http.api;
 
+import io.XBuffer;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
-
-import http.net.kernel.XBuffer;
 
 /**
  * 

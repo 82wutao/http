@@ -1,0 +1,6 @@
+wwwRoot=C:/Users/Administrator/git/http/webapp
+workerThread=10
+
+alias.name=/home/wutao/test
+
+attribute.name=value

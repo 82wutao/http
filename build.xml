@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="package" name="yunweitool">
+
+	<property name="src" value="src" />
+	<property name="tar" value="bin" />
+
+	<target name="clean">
+		<delete>
+			<fileset dir="bin">
+				<include name="*" />
+			</fileset>
+		</delete>
+		<delete>
+			<fileset dir="webapp/">
+				<include name="lib/tools.jar" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target depends="clean" name="compile">
+		<javac debug="true" source="1.7" includeantruntime="false" deprecation="true" encoding="UTF-8" destdir="${tar}" failonerror="true" srcdir="${src}">
+			<compilerarg value="-Xlint:deprecation" />
+		</javac>
+	</target>
+
+	<target depends="compile" name="package">
+		
+		<copy todir="${tar}">
+			<fileset dir="${src}">
+				<include name="**/*" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copydir dest="dest/main" src="${tar}/main"></copydir>
+		<jar destfile="dest/lib/tools.jar" basedir="${tar}" />
+		<zip destfile="dest.zip" basedir="dest/"/>
+	</target>
+</project>

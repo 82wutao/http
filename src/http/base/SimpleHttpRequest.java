@@ -3,7 +3,7 @@ package http.base;
 import http.api.Cookie;
 import http.api.HttpRequest;
 import http.api.MultiPartForm;
-import http.net.kernel.XBuffer;
+import io.XBuffer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

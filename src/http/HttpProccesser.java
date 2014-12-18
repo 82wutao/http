@@ -5,7 +5,7 @@ import http.api.WebAppContext;
 import http.base.SimpleHttpRequest;
 import http.base.SimpleHttpResponse;
 import http.net.HttpProtocol;
-import http.net.kernel.XBuffer;
+import io.XBuffer;
 
 import java.io.IOException;
 import java.net.Socket;

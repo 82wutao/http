@@ -10,13 +10,13 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.print.attribute.standard.Media;
+
 public class SimpleWebAppContext implements WebAppContext {
 	ServerContext serverContext;
 	String contextPath;
 	String filePath;
 	HttpServerlet documentServerlet = new StaticDocumentServerlet();
-	HttpServerlet dirServerlet = new DirectoryServerlet();
-	HttpServerlet postServlet=new UploadFileServerlet();
 	
 	Map<String, String> mimeMap = new HashMap<String, String>();
 
@@ -48,13 +48,6 @@ public class SimpleWebAppContext implements WebAppContext {
 	public void doService(HttpRequest request, HttpResponse response) {
 		String method = request.getRequestMethod();
 		HttpServerlet serverlet =documentServerlet;
-		String uri = request.getRequestUri();
-		if (method.equals("GET")
-				&&uri.endsWith("/")) {
-			serverlet=dirServerlet;
-		}else if (method.equals("POST")) {
-			serverlet=postServlet;
-		}
 		
 		if (method.equals("CONNECT")) {
 			serverlet.doCONNECT(this, request, response);
@@ -78,6 +71,13 @@ public class SimpleWebAppContext implements WebAppContext {
 
 	public String mimeType(String resourceType) {
 		String mime = mimeMap.get(resourceType);
+		if (mime==null) {
+			mime=serverContext.getMimeType(resourceType);
+		}
 		return mime == null ? "application/octet-stream" : mime;
+	}
+	@Override
+	public String getContextAttribute(String param) {
+		return null;
 	}
 }

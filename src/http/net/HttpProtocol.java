@@ -3,7 +3,7 @@ package http.net;
 import http.HttpProccesser;
 import http.api.HttpResponse;
 import http.base.SimpleHttpRequest;
-import http.net.kernel.XBuffer;
+import io.XBuffer;
 
 import java.io.IOException;
 import java.net.Socket;

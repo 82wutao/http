@@ -1,4 +1,0 @@
-wwwRoot=/home/wutao/www
-workerThread=10
-
-alias.name=/home/wutao/test

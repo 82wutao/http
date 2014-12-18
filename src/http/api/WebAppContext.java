@@ -14,4 +14,6 @@ public interface WebAppContext {
 
 	public void doService(HttpRequest request, HttpResponse response) ;
 	public String mimeType(String resourceType) ;
+	
+	public String getContextAttribute(String param);
 }
