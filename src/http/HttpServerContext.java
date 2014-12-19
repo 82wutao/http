@@ -120,7 +120,8 @@ public class HttpServerContext implements ServerContext {
 		mimes.put("dot", "application/msword");
 		mimes.put("drw", "application/x-drw");
 		mimes.put("dtd", "text/xml");
-		mimes.put("dwf", "Model/vnd.dwf application/x-dwf");
+		mimes.put("dwf", "Model/vnd.dwf");
+//		mimes.put("dwf", "application/x-dwf");
 		mimes.put("dwg", "application/x-dwg");
 		mimes.put("dxb", "application/x-dxb");
 		mimes.put("dxf", "application/x-dxf");
@@ -130,7 +131,8 @@ public class HttpServerContext implements ServerContext {
 		mimes.put("eml", "message/rfc822");
 		mimes.put("ent", "text/xml");
 		mimes.put("epi", "application/x-epi");
-		mimes.put("eps", "application/x-ps application/postscript");
+		mimes.put("eps", "application/x-ps");
+//		mimes.put("eps", "application/postscript");
 		mimes.put("etd", "application/x-ebx");
 		mimes.put("exe", "application/x-msdownload");
 
@@ -160,7 +162,8 @@ public class HttpServerContext implements ServerContext {
 		mimes.put("htx", "text/html");
 
 		mimes.put("icb", "application/x-icb");
-		mimes.put("ico", "image/x-icon application/x-ico");
+		mimes.put("ico", "image/x-icon");
+		//mimes.put("ico", "application/x-ico");
 		mimes.put("iff", "application/x-iff");
 		mimes.put("ig4", "application/x-g4");
 		mimes.put("igs", "application/x-igs");
@@ -173,9 +176,11 @@ public class HttpServerContext implements ServerContext {
 
 		mimes.put("java", "java/*");
 		mimes.put("jfif", "image/jpeg");
-		mimes.put("jpe", "image/jpeg application/x-jpe");
+		mimes.put("jpe", "image/jpeg");
+		//mimes.put("jpe", "application/x-jpe");
 		mimes.put("jpeg", "image/jpeg");
-		mimes.put("jpg", "image/jpeg application/x-jpg");
+		mimes.put("jpg", "image/jpeg");
+		//mimes.put("jpg", "application/x-jpg");
 		mimes.put("js", "application/x-javascript");
 		mimes.put("jsp", "text/html");
 
@@ -195,7 +200,8 @@ public class HttpServerContext implements ServerContext {
 		mimes.put("mac", "application/x-mac");
 		mimes.put("man", "application/x-troff-man");
 		mimes.put("math", "text/xml");
-		mimes.put("mdb", "application/msaccess application/x-mdb");
+		mimes.put("mdb", "application/msaccess");
+//		mimes.put("mdb", "application/x-mdb");
 		mimes.put("mfp", "application/x-shockwave-flash");
 		mimes.put("mht", "message/rfc822");
 		mimes.put("mhtml", "message/rfc822");
@@ -257,17 +263,20 @@ public class HttpServerContext implements ServerContext {
 		mimes.put("plg", "text/html");
 		mimes.put("pls", "audio/scpls");
 		mimes.put("plt", "application/x-plt");
-		mimes.put("png", "image/png application/x-png");
+		mimes.put("png", "image/png");
+//		mimes.put("png", "application/x-png");
 		mimes.put("pot", "application/vnd.ms-powerpoint");
 		mimes.put("ppa", "application/vnd.ms-powerpoint");
 		mimes.put("ppm", "application/x-ppm");
 		mimes.put("pps", "application/vnd.ms-powerpoint");
-		mimes.put("ppt", "application/vnd.ms-powerpoint application/x-ppt");
+		mimes.put("ppt", "application/vnd.ms-powerpoint");
+//		mimes.put("ppt", "application/x-ppt");
 		mimes.put("pr", "application/x-pr");
 		mimes.put("prf", "application/pics-rules");
 		mimes.put("prn", "application/x-prn");
 		mimes.put("prt", "application/x-prt");
-		mimes.put("ps", "application/x-ps application/postscript");
+		mimes.put("ps", "application/x-ps");
+//		mimes.put("ps", "application/postscript");
 		mimes.put("ptn", "application/x-ptn");
 		mimes.put("pwz", "application/vnd.ms-powerpoint");
 
@@ -298,7 +307,8 @@ public class HttpServerContext implements ServerContext {
 		mimes.put("rpm", "audio/x-pn-realaudio-plugin");
 		mimes.put("rsml", "application/vnd.rn-rsml");
 		mimes.put("rt", "text/vnd.rn-realtext");
-		mimes.put("rtf", "application/msword application/x-rtf");
+		mimes.put("rtf", "application/msword");
+//				mimes.put("rtf", "application/x-rtf");
 		mimes.put("rv", "video/vnd.rn-realvideo");
 
 		mimes.put("sam", "application/x-sam");
@@ -331,7 +341,8 @@ public class HttpServerContext implements ServerContext {
 		mimes.put("tdf", "application/x-tdf");
 		mimes.put("tg4", "application/x-tg4");
 		mimes.put("tga", "application/x-tga");
-		mimes.put("tif", "image/tiff application/x-tif");
+		mimes.put("tif", "image/tiff");
+//				mimes.put("tif", "application/x-tif");
 		mimes.put("tiff", "image/tiff");
 		mimes.put("tld", "text/xml");
 		mimes.put("top", "drawing/x-top");
@@ -346,9 +357,11 @@ public class HttpServerContext implements ServerContext {
 		mimes.put("vdx", "application/vnd.visio");
 		mimes.put("vml", "text/xml");
 		mimes.put("vpg", "application/x-vpeg005");
-		mimes.put("vsd", "application/vnd.visio application/x-vsd");
+		mimes.put("vsd", "application/vnd.visio");
+//		mimes.put("vsd", "application/x-vsd");
 		mimes.put("vss", "application/vnd.visio");
-		mimes.put("vst", "application/vnd.visio application/x-vst");
+		mimes.put("vst", "application/vnd.visio");
+//		mimes.put("vst", "application/x-vst");
 		mimes.put("vsw", "application/vnd.visio");
 		mimes.put("vsx", "application/vnd.visio");
 		mimes.put("vtx", "application/vnd.visio");
@@ -373,6 +386,7 @@ public class HttpServerContext implements ServerContext {
 		mimes.put("wmv", "video/x-ms-wmv");
 		mimes.put("wmx", "video/x-ms-wmx");
 		mimes.put("wmz", "application/x-ms-wmz");
+		mimes.put("woff", "application/x-font-woff");
 		mimes.put("wp6", "application/x-wp6");
 		mimes.put("wpd", "application/x-wpd");
 		mimes.put("wpg", "application/x-wpg");

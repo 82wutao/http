@@ -11,8 +11,8 @@
 			</fileset>
 		</delete>
 		<delete>
-			<fileset dir="webapp/">
-				<include name="lib/tools.jar" />
+			<fileset dir="dest/lib">
+				<include name="tools.jar" />
 			</fileset>
 		</delete>
 	</target>

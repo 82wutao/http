@@ -25,14 +25,15 @@ public class SimpleHttpResponse implements HttpResponse {
 
 	private File document = null;
 	private XBuffer buffer=null;
-	
-	private List<String> content = new ArrayList<String>();
+	private List<byte[]> content = new ArrayList<byte[]>();
+private long bodySize =0;
 
 	private WebAppContext appContext = null;
 
 	public SimpleHttpResponse(WebAppContext appContext,XBuffer outBuffer) {
 		this.appContext = appContext;
 		buffer = outBuffer;
+		headMap.put(HttpResponse.Head_Connection_Response, "close");
 	}
 
 	@Override
@@ -71,25 +72,26 @@ public class SimpleHttpResponse implements HttpResponse {
 
 	@Override
 	public void write(String text) {
-		this.content.add(text);
+		byte[] data = text.getBytes(Charset.forName("UTF8"));
+		bodySize+=data.length;
+		this.content.add(data);
+		
 	}
 
 	@Override
 	public void write(File file) {
 		document = file;
-		String name = document.getName();
-		int dot = name.indexOf('.');
-		if (dot == -1) {
+		bodySize+=document.length();
+		
+		String[] name_fix = document.getName().split("\\.");
+		if (name_fix.length==1) {
 			this.setContentType("application/octet-stream");
 			return;
 		}
 
-		String subfix = name.substring(dot + 1);
-		String mimeType = this.appContext.mimeType(subfix);
-		if (mimeType==null) {
-			mimeType=this.appContext.getServerContext().getMimeType(subfix);
-		}
-		this.setContentType(mimeType);
+		int subfix=name_fix.length-1;
+		String typeString = appContext.mimeType(name_fix[subfix].trim());
+		this.setContentType(typeString);	
 	}
 
 	@Override
@@ -104,7 +106,8 @@ public class SimpleHttpResponse implements HttpResponse {
 		if (contentType == null) {
 			headMap.put(HttpResponse.Head_ContentType_Response, "text/plain");
 		}
-
+		headMap.put(Head_ContentLength_Response, ""+bodySize);
+		
 		byte[] version = pv.getBytes(Charset.forName("ASCII"));
 		outputStream.write(version);
 
@@ -128,17 +131,15 @@ public class SimpleHttpResponse implements HttpResponse {
 		outputStream.write(line);
 
 		if (!content.isEmpty()) {
-			for (String text : content) {
+			for (byte[] text : content) {
 				if (text==null) {
 					continue;
 				}
-				if (text.equals("")) {
-					continue;
-				}
-				outputStream.write(text.getBytes("UTF-8"));
+				outputStream.write(text);
 			}
 		}
-		if (document != null && document.exists()) {
+		
+		if (document != null ) {
 			byte[] array=buffer.getData();
 			int length = array.length;
 			

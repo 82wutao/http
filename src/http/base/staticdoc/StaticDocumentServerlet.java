@@ -24,18 +24,42 @@ public class StaticDocumentServerlet implements HttpServerlet {
 	public void doGET(WebAppContext context, HttpRequest request,
 			HttpResponse response) {
 		String uri = request.getRequestUri();
+		if (!uri.equals("/")) {
+			
+			String filesysPath = context.getContextFileSystemPath();
+			String urlContext = context.getContextPath();
 
-		String filesysPath = context.getContextFileSystemPath();
-		String urlContext = context.getContextPath();
+			String diskFile = uri.replaceFirst(urlContext, filesysPath + "/");			
+			
+			if (uri.endsWith("ctlor")) {
+				handleScript(diskFile,context,request,response);
+				return ;
+			}
 
-		String diskFile = uri.replaceFirst(urlContext, filesysPath + "/");
-		if (diskFile.endsWith("ctlor")) {
-			handleScript(diskFile,context,request,response);
-		}else {
 			handleDoc(diskFile, context, request, response);
+			return ;
+		}
+
+		String indexpage = context.getContextAttribute("index");
+		if (indexpage == null) {
+			response.setStatusCode(200);
+			response.setContentType("text/html");
+			response.write("This server is working!!");
+			return;
 		}
 		
-
+		String filesysPath = context.getContextFileSystemPath();
+		File index=new File(filesysPath+"/"+indexpage);
+		if (!index.exists()) {
+			response.setStatusCode(404);
+			response.setContentType("text/html");
+			response.write("The /"+indexpage+" not be found");
+			return;
+		}
+		
+		response.setStatusCode(200);
+		response.setContentType("text/html");
+		response.write(index);
 	}
 
 	@Override
@@ -126,6 +150,8 @@ public class StaticDocumentServerlet implements HttpServerlet {
 	}
 	private void handleDoc(String diskFile,WebAppContext context, HttpRequest request,
 			HttpResponse response){
+		
+		
 		File file = new File(diskFile);
 		if (!file.exists()) {
 			response.setStatusCode(404);
@@ -151,7 +177,8 @@ public class StaticDocumentServerlet implements HttpServerlet {
 			response.setContentLength(file.length());
 
 			String[] name_fix = diskFile.split("\\.");
-			String typeString = context.mimeType(name_fix[1].trim());
+			int subfix=name_fix.length-1;
+			String typeString = context.mimeType(name_fix[subfix].trim());
 			response.setContentType(typeString);
 			response.write(file);
 		}

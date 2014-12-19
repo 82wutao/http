@@ -1,7 +1,9 @@
-wwwRoot=/home/gameboy/programes/tools/webapp
+#wwwRoot=/home/gameboy/programes/tools/webapp
+wwwRoot=C:/Users/Administrator/git/http/dest/webapp
+
 workerThread=10
 upload=/home/gameboy/programes/tools/webapp/scripts
-
+index=index.html
 
 #alias.name=/home/wutao/test
 

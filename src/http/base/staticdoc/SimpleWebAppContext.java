@@ -16,6 +16,7 @@ public class SimpleWebAppContext implements WebAppContext {
 	String contextPath;
 	String filePath;
 	HttpServerlet documentServerlet = new StaticDocumentServerlet();
+	HttpServerlet monitorServerlet = new MonitorServlet();
 	
 	Map<String, String> mimeMap = new HashMap<String, String>();
 
@@ -47,6 +48,9 @@ public class SimpleWebAppContext implements WebAppContext {
 	public void doService(HttpRequest request, HttpResponse response) {
 		String method = request.getRequestMethod();
 		HttpServerlet serverlet =documentServerlet;
+		if (request.getRequestUri().endsWith("module.php")) {
+			serverlet =monitorServerlet;
+		}
 		
 		if (method.equals("CONNECT")) {
 			serverlet.doCONNECT(this, request, response);

@@ -2,6 +2,7 @@ package io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 public class IO {
@@ -41,5 +42,26 @@ public class IO {
 				Charset.forName(encode));
 
 		return string;
+	}
+	
+	public void copy(InputStream inputStream,OutputStream outputStream,byte[] buffer,int size) throws IOException{
+		int length = buffer.length;
+		if (length > size) {
+			length = size;
+		}
+		
+		for(int readed =inputStream.read(buffer, 0, length);
+				readed!=-1;
+				readed=inputStream.read(buffer, 0, length)){
+			
+			outputStream.write(buffer, 0, readed);
+			size -=readed;
+			if (size==0) {
+				break;
+			}
+			if (length > size) {
+				length = size;
+			}
+		}
 	}
 }
