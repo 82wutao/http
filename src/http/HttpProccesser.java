@@ -38,9 +38,17 @@ public class HttpProccesser implements Runnable {
 			exception = e;
 			response = new SimpleHttpResponse(null,this.buffer);
 			response.setHttpVersion("HTTP/1.1");
-			response.setStatusCode(404);
+			response.setStatusCode(500);
 			response.setContentType("text/html");
-			response.write("<html><head><title>Not founded</title></head><body>Not founded</body></html>");
+			response.write("<html><head><title>Server Error</title></head>");
+			
+			response.write("<body>");
+			response.write(e.getMessage()+"<br/>");
+			StackTraceElement[] stackInfo=e.getStackTrace();
+			for (int i = 0; i < stackInfo.length; i++) {
+				response.write("&nbsp;&nbsp;&nbsp;&nbsp;"+stackInfo[i].getClassName()+":"+stackInfo[i].getLineNumber()+"<br/>");
+			}
+			response.write("</body></html>");
 		}
 		
 
@@ -63,7 +71,15 @@ public class HttpProccesser implements Runnable {
 				response.setHttpVersion("HTTP/1.1");
 				response.setStatusCode(500);
 				response.setContentType("text/html");
-				response.write("<html><head><title>Not founded</title></head><body>Not founded</body></html>");
+				response.write("<html><head><title>Server Error</title></head>");
+				
+				response.write("<body>");
+				response.write(e.getMessage()+"<br/>");
+				StackTraceElement[] stackInfo=e.getStackTrace();
+				for (int i = 0; i < stackInfo.length; i++) {
+					response.write("&nbsp;&nbsp;&nbsp;&nbsp;"+stackInfo[i].getClassName()+":"+stackInfo[i].getLineNumber()+"<br/>");
+				}
+				response.write("</body></html>");
 			}
 		}
 

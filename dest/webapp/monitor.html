@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="Monitor your Linux server through a simple web dashboard. Open source and free!">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
         <link href="/css/bootstrap.min.css" rel="stylesheet" type="text/css">
         <link href="/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css">
@@ -102,8 +102,7 @@
 		    	<div class="container">
 		        	<div class="lead" style="text-align: center;">
 		            	<div class="btn icon-refresh js-refresh-info" data-title="Refresh all widgets!" data-toggle="tooltip" id="refresh-all"></div>
-		                <div>
-		                                        A simple web dashboard to monitor your server.
+		                <div>A simple web dashboard to monitor your server.
 		                </div>
 					</div>
 		            <div id="widgets" class="row">
@@ -219,20 +218,21 @@
 								</div><!-- /widget-content -->
 							</div><!-- /widget -->
 						</div><!-- /span6 -->
+						<!-- 
 						<div class="span6">
-						<div id="dns-lease-widget" class="widget widget-table">
-						<div class="widget-header">
-						<i class="icon-list"></i>
-						<h3>
-						                                                                                                                                        DHCP Leases
-						</h3>
-						<div id="refresh-dnsmasqleases" class="btn icon-refresh js-refresh-info"></div>
-						</div><!-- /widget-header -->
-						<div class="widget-content">
-						<table id="dnsmasqleases_dashboard" class="table table-hover table-condensed table-bordered"></table>
-						</div><!-- /widget-content -->
-						</div><!-- /widget -->
+							<div id="dns-lease-widget" class="widget widget-table">
+								<div class="widget-header">
+									<i class="icon-list"></i>
+									<h3>DHCP Leases
+									</h3>
+									<div id="refresh-dnsmasqleases" class="btn icon-refresh js-refresh-info"></div>
+								</div>
+								<div class="widget-content">
+									<table id="dnsmasqleases_dashboard" class="table table-hover table-condensed table-bordered"></table>
+								</div> 
+							</div> 
 						</div><!-- /span6 -->
+						
 						<div class="span3">
 						<div id="ip-widget" class="widget widget-table">
 						<div class="widget-header">
@@ -284,36 +284,39 @@
 						</div>
 						</div>
 						</div><!-- /span4 -->
+						<!--
 						<div class="span4">
-						<div id="ping-widget" class="widget widget-table">
-						<div class="widget-header">
-						<i class="icon-exchange"></i>
-						<h3>
-						                                                                                                                                                                                Ping
-						</h3>
-						<div id="refresh-ping" class="btn js-refresh-info"><span class="icon-refresh"></span></div>
-						</div>
-						<div class="widget-content">
-						<table id="ping_dashboard" class="table table-hover table-condensed table-bordered"></table>
-						</div>
-						</div>
+							<div id="ping-widget" class="widget widget-table">
+								<div class="widget-header">
+									<i class="icon-exchange"></i>
+									<h3> Ping
+									</h3>
+									<div id="refresh-ping" class="btn js-refresh-info"><span class="icon-refresh"></span></div>
+								</div>
+								<div class="widget-content">
+									<table id="ping_dashboard" class="table table-hover table-condensed table-bordered"></table>
+								</div>
+							</div>
 						</div><!-- /span4 -->
+						<!--
 						<div class="span4">
-						<div id="bandwidth-widget" class="widget widget-table">
-						<div class="widget-header">
-						<i class="icon-exchange"></i>
-						<h3>
-						                                                                                                                                                                                Bandwidth
-						</h3>
-						<div id="refresh-bandwidth" class="btn js-refresh-info"><span class="icon-refresh"></span></div>
-						</div><!-- /widget-header -->
-						<div class="widget-content">
-						<div style="padding:10px;text-align:center;">
-						<i style="color:#19bc9c; font:20px/2em 'Open Sans',sans-serif;" class="icon-#" id="bw-int">eth0:</i>&nbsp; RX: <span class="lead odometer" style="margin-top:11px;" id="bw-rx">0</span>&nbsp;&nbsp;|&nbsp;&nbsp; TX: <span class="lead odometer" style="margin-top:11px;" id="bw-tx"></span>
+							<div id="bandwidth-widget" class="widget widget-table">
+								<div class="widget-header">
+									<i class="icon-exchange"></i>
+									<h3>     Bandwidth
+									</h3>
+									<div id="refresh-bandwidth" class="btn js-refresh-info"><span class="icon-refresh"></span></div>
+								</div>
+								<div class="widget-content">
+									<div style="padding:10px;text-align:center;">
+									<i style="color:#19bc9c; font:20px/2em 'Open Sans',sans-serif;" class="icon-#" id="bw-int">eth0:</i>
+									&nbsp; RX: <span class="lead odometer" style="margin-top:11px;" id="bw-rx">0</span>
+									&nbsp;&nbsp;|&nbsp;&nbsp; TX: <span class="lead odometer" style="margin-top:11px;" id="bw-tx"></span>
+								</div>
+								</div>
+							</div>
 						</div>
-						</div><!-- /widget-content -->
-						</div><!-- /widget -->
-						</div><!-- /span4 -->
+						-->
 						<div class="span4">
 						<div id="users-widget" class="widget widget-table action-table">
 						<div class="widget-header">

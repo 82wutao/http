@@ -193,11 +193,13 @@ public class StaticDocumentServerlet implements HttpServerlet {
 			String appContext=context.getContextFileSystemPath();
 			
 			String result =Cmd.getInstance().execute("sh "+appContext+"/scripts/"+cmd+".sh", "utf8");
-			response.write(result);
+			if (result!=null) {				
+				response.write(result);
+			}
 		}catch(Exception e){
-			exception=e;
-			
-			response.write(exception.getMessage());//输出数据
+			e.printStackTrace();
+			exception =e;
+			response.write(e.getMessage());//输出数据
 			response.write("<br/>");//输出一个换行符
 			
 			StackTraceElement[] stacks=exception.getStackTrace();
