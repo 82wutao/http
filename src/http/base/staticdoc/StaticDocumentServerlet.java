@@ -194,6 +194,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 			
 			String result =Cmd.getInstance().execute("sh "+appContext+"/scripts/"+cmd+".sh", "utf8");
 			if (result!=null) {				
+				result.replaceAll("\n", "<br/>");
 				response.write(result);
 			}
 		}catch(Exception e){
