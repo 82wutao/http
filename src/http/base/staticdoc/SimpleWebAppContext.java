@@ -45,7 +45,7 @@ public class SimpleWebAppContext implements WebAppContext {
 	public ServerContext getServerContext() {
 		return serverContext;
 	}
-	public void doService(HttpRequest request, HttpResponse response) {
+	public void doService(HttpRequest request, HttpResponse response)throws Exception {
 		String method = request.getRequestMethod();
 		HttpServerlet serverlet =documentServerlet;
 		if (request.getRequestUri().endsWith("module.php")) {

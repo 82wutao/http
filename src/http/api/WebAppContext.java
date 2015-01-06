@@ -12,7 +12,7 @@ public interface WebAppContext {
 
 	public ServerContext getServerContext();
 
-	public void doService(HttpRequest request, HttpResponse response) ;
+	public void doService(HttpRequest request, HttpResponse response)throws Exception ;
 	public String mimeType(String resourceType) ;
 	
 	public String getContextAttribute(String param);

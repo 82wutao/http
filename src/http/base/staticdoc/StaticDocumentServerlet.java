@@ -22,7 +22,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 
 	@Override
 	public void doGET(WebAppContext context, HttpRequest request,
-			HttpResponse response) {
+			HttpResponse response) throws Exception{
 		String uri = request.getRequestUri();
 		if (!uri.equals("/")) {
 			
@@ -184,7 +184,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 		}
 	}
 	private void handleScript(String url,WebAppContext context, HttpRequest request,
-			HttpResponse response){
+			HttpResponse response) throws Exception{
 		String cmd = request.getParamerValue("script");
 		response.setContentType("text/html");
 		response.write("<html><head><meta charset=\"UTF-8\"><title>"+cmd+"</title></head><body>");//输出数据
@@ -198,24 +198,25 @@ public class StaticDocumentServerlet implements HttpServerlet {
 				response.write(result);
 			}
 		}catch(Exception e){
-			e.printStackTrace();
-			exception =e;
-			response.write(e.getMessage());//输出数据
-			response.write("<br/>");//输出一个换行符
-			
-			StackTraceElement[] stacks=exception.getStackTrace();
-			for(int i=0;i<stacks.length;i++){
-				String clazz= stacks[i].getClassName();
-				String method= stacks[i].getMethodName();
-				int line =stacks[i].getLineNumber();
-				
-				response.write(clazz);//输出数据
-				response.write(":");//输出数据
-				response.write(method);//输出数据
-				response.write(":");//输出数据
-				response.write(line+"");//输出数据
-				response.write("<br/>");//输出一个换行符
-			}
+			throw e;
+//			e.printStackTrace();
+//			exception =e;
+//			response.write(e.getMessage());//输出数据
+//			response.write("<br/>");//输出一个换行符
+//			
+//			StackTraceElement[] stacks=exception.getStackTrace();
+//			for(int i=0;i<stacks.length;i++){
+//				String clazz= stacks[i].getClassName();
+//				String method= stacks[i].getMethodName();
+//				int line =stacks[i].getLineNumber();
+//				
+//				response.write(clazz);//输出数据
+//				response.write(":");//输出数据
+//				response.write(method);//输出数据
+//				response.write(":");//输出数据
+//				response.write(line+"");//输出数据
+//				response.write("<br/>");//输出一个换行符
+//			}
 		}
 		response.write("</body></html>");
 	}
