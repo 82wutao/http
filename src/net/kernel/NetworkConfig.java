@@ -1,9 +1,10 @@
-package http.net.kernel;
+package net.kernel;
 
-import http.net.HttpProtocol;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+
+import net.HttpProtocol;
 
 /**
  * 关于网络服务的简单配置。

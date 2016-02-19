@@ -1,4 +1,4 @@
-package http.memories;
+package common.memories;
 
 public abstract class PoolableObjectFactory<T extends PoolableObject> {
 	public abstract T newObject();

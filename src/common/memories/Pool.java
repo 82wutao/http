@@ -1,4 +1,4 @@
-package http.memories;
+package common.memories;
 
 import java.util.LinkedList;
 import java.util.Queue;

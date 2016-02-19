@@ -1,4 +1,4 @@
-package http.concurrents;
+package common.concurrents;
 
 public class AsynchronizedCondition{
 	int value=0;

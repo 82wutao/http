@@ -1,4 +1,4 @@
-package http.net;
+package net;
 
 import http.HttpProccesser;
 import http.api.HttpResponse;
@@ -7,6 +7,7 @@ import io.XBuffer;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.Charset;
 
 public class HttpProtocol  {
 	

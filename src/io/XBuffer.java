@@ -1,12 +1,12 @@
 package io;
 
-import http.memories.PoolableObject;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import common.memories.PoolableObject;
+
 public class XBuffer implements PoolableObject{
-	public static final Charset PROTOCOL_CHARSET=Charset.forName("utf8");
 	boolean wrapped;
 	byte[] data;
 	int length;
@@ -22,6 +22,7 @@ public class XBuffer implements PoolableObject{
 		this.length = dat.length;
 		limit = offset + length;
 		index = offset;
+		
 	}
 
 	public XBuffer(int capacity) {
@@ -30,6 +31,7 @@ public class XBuffer implements PoolableObject{
 		length = capacity;
 		limit = capacity;
 		index = 0;
+		
 	}
 
 	public void readyWritingToBuffer() {
@@ -338,11 +340,11 @@ public class XBuffer implements PoolableObject{
 		System.arraycopy(value,offer,data, pos, arr_len);
 	}
 
-	public String readString() throws IOException{
+	public String readString(Charset PROTOCOL_CHARSET) throws IOException{
 		short len = readshort(1);
 		byte[] str_buff=new byte[len];
 		readbytes(str_buff, 0, len);
-		return new String(str_buff,XBuffer.PROTOCOL_CHARSET);
+		return new String(str_buff,PROTOCOL_CHARSET);
 	}
 	public String readString(int pos)throws IOException{
 		short len = readshort(pos);
@@ -350,12 +352,12 @@ public class XBuffer implements PoolableObject{
 		readbytes(pos+2,str_buff, 0, len);
 		return new String(str_buff);
 	}
-	public void writeString(String str){
+	public void writeString(String str,Charset PROTOCOL_CHARSET){
 		byte[] bytes=str.getBytes(PROTOCOL_CHARSET);
 		writeshort((short)bytes.length,1);
 		writebytes(bytes, 0, bytes.length);
 	}
-	public void writeString(int pos,String str){
+	public void writeString(int pos,String str,Charset PROTOCOL_CHARSET){
 		byte[] bytes=str.getBytes(PROTOCOL_CHARSET);
 		writeshort(pos,(short)bytes.length,1);
 		writebytes(pos+2,bytes, 0, bytes.length);

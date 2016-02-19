@@ -2,12 +2,13 @@ package main;
 
 import http.HttpServerContext;
 import http.api.ServerContext;
-import http.net.HttpProtocol;
-import http.net.kernel.IOService;
-import http.net.kernel.NetworkConfig;
 
 import java.io.File;
 import java.io.IOException;
+
+import net.HttpProtocol;
+import net.kernel.IOService;
+import net.kernel.NetworkConfig;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
