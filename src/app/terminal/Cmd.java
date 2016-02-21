@@ -1,9 +1,9 @@
 package app.terminal;
 
-import io.IO;
-
 import java.io.IOException;
 import java.io.InputStream;
+
+import common.io.IO;
 
 public class Cmd {
 	public static Cmd instance = new Cmd();

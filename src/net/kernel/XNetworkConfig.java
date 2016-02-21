@@ -2,20 +2,21 @@ package net.kernel;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.channels.SocketChannel;
 
 import net.Handler;
 import net.IOListener;
 
-public class XNetworkConfig {
+public abstract class XNetworkConfig<Request> {
 	public SocketAddress address;
 	public int acceptBacklog;
 	public boolean tcpNoDelay;
 	public int rcvBuffer;
 	public int sendBuffer;
 
-	public IOListener ioListener;
+	public IOListener<Request> ioListener;
 
-	public Handler appHandler;
+	public Handler<Request> appHandler;
 
 	public XNetworkConfig(String host, int port, int backlog, boolean noDelay) {
 		if (host == null || host.equals("")) {
@@ -36,8 +37,9 @@ public class XNetworkConfig {
 		sendBuffer = sendSizer;
 	}
 
-	public void setupApplication(IOListener listener, Handler app) {
+	public void setupApplication(IOListener<Request> listener, Handler<Request> app) {
 		ioListener = listener;
 		appHandler = app;
 	}
+	public abstract NetSession<Request> newNetworkSession(SocketChannel channel);
 }

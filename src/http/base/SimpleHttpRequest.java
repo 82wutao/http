@@ -3,7 +3,6 @@ package http.base;
 import http.api.Cookie;
 import http.api.HttpRequest;
 import http.api.MultiPartForm;
-import io.XBuffer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -12,6 +11,8 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+
+import common.io.XBuffer;
 
 public class SimpleHttpRequest implements HttpRequest {
 	private XBuffer header;

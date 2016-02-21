@@ -1,47 +1,37 @@
 package net.kernel;
 
-import http.HttpProccesser;
 import http.api.ServerContext;
-import io.XBuffer;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketOption;
-import java.net.SocketOptions;
 import java.net.StandardSocketOptions;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import common.Pair;
-import common.memories.Pool;
-import common.memories.PoolableObject;
-import common.memories.PoolableObjectFactory;
 
 /***
  * 监听多个端口。每个端口配一个handler
  * @author wutao
  *
  */
-public class XIOService implements Runnable {
+public class XIOService<Request> implements Runnable,ChannelInterestEvent<Request> {
 
-	private List<XNetworkConfig> networkConfig = null;
+	private List<XNetworkConfig<Request>> networkConfig = null;
 	private List<ServerSocketChannel> serverChannel = null;
-	private Map<ServerSocketChannel, XNetworkConfig> port_app=new HashMap<ServerSocketChannel, XNetworkConfig>();
+	private Map<ServerSocketChannel, XNetworkConfig<Request>> port_app=new HashMap<ServerSocketChannel, XNetworkConfig<Request>>();
 	private Selector selector=null;
+	private AtomicInteger wakeupLock = new AtomicInteger(0);
 	
 	private boolean running = false;
 //	private Pool<XBuffer> bufferPool= new Pool<XBuffer>(1024, 2048, new PoolableObjectFactory<XBuffer>() {
@@ -61,53 +51,30 @@ public class XIOService implements Runnable {
 		this.serverContext=serverContext;
 	}
 
-	public void configure(List<XNetworkConfig> configs)
-			throws IOException {
-		
-		networkConfig = configs;
-		running = true;
-
-	}
-
-	public void startListen() throws IOException{
-		selector = Selector.open();
-
-		Thread service = new Thread(this);
-		service.start();
-	}
-
 	public void stopListen() throws IOException {
 		running = false;
 		
-		for ( ServerSocketChannel channel:serverChannel) {
-			channel.close();
+		if (serverChannel!=null) {
+			for ( ServerSocketChannel channel:serverChannel) {
+				channel.close();
+			}
 		}
 		selector.close();
 	}
-
-
 
 	/**
 	 * IOService
 	 */
 	public void run() {
-		
 		try {
-			for (XNetworkConfig config :networkConfig) {
-				ServerSocketChannel server = ServerSocketChannel.open();
-				serverChannel.add(server);
-				
-				server.configureBlocking(false);
-				server.bind(config.address);
-				
-				port_app.put(server, config);
-				
-				server.register(selector,SelectionKey.OP_ACCEPT);
-			}
-			
-			List<Pair<SocketChannel, XNetworkConfig>> goclosing=new ArrayList<Pair<SocketChannel,XNetworkConfig>>();
+			List<Pair<SocketChannel, XNetworkConfig<Request>>> goclosing=new ArrayList<Pair<SocketChannel,XNetworkConfig<Request>>>();
 			while (running) {
-				int selected = selector.select(1000);//TODO auto update this value
+				
+				int selected = 0;
+				if(wakeupLock.compareAndSet(0, 1)){
+					selector.select(1000);//TODO auto update this value
+				}
+				wakeupLock.set(0);
 				if (selected == 0) {
 					//TODO  auto update this value
 				}
@@ -121,44 +88,53 @@ public class XIOService implements Runnable {
 					
 					if (key.isAcceptable()) {
 						ServerSocketChannel server =(ServerSocketChannel)key.channel();
-						XNetworkConfig app=port_app.get(server);
+						XNetworkConfig<Request> app=port_app.get(server);
 						
 						SocketChannel client= server.accept();
-						accept(client,app);
-						app.ioListener.opennedChannel(client);
+						NetSession<Request> session=accept(client,app);
+						app.ioListener.opennedChannel(session);
 					}
 					
 					SocketChannel client =(SocketChannel)key.channel();
-					Pair<ByteBuffer, XNetworkConfig> clientAttachment=(Pair)key.attachment();
+					Pair<NetSession<Request>, XNetworkConfig<Request>> clientAttachment=(Pair)key.attachment();
 					if (key.isConnectable()) {
 						client.register(selector, SelectionKey.OP_READ);
-						clientAttachment.t.ioListener.connectedChannel(client);
+						NetSession<Request> session = clientAttachment.k;
+						clientAttachment.t.ioListener.connectedChannel(session);
 					}
 					else if (key.isReadable()) {
-						ByteBuffer buffer = clientAttachment.k;
-						buffer.clear();
-						
-						int read = client.read(buffer);
+						NetSession<Request> session = clientAttachment.k;
+						int read = session.readBytesFromChanel();
 						
 						do{
 							if(read ==-1){
-								goclosing.add(new Pair<SocketChannel, XNetworkConfig>(client, clientAttachment.t));
+								client.close();
+								clientAttachment.t.ioListener.closedChannel(session);
 								break;
 							}
 							
-							XBuffer xBuffer=new XBuffer(buffer.array(), 0, read);
-							while(xBuffer.remain()>0){
-								clientAttachment.t.ioListener.readable(client,xBuffer);
+							while(session.readableBufferRemaining()>0){
+								clientAttachment.t.ioListener.readable(session);
 							}
 						}while(false);						
 					}
 					else if (key.isWritable()) {
+						NetSession<Request> session = clientAttachment.k;
 						
-					}
-					
-					for(Pair<SocketChannel, XNetworkConfig> pair:goclosing){
-						pair.k.close();
-						pair.t.ioListener.closedChannel(pair.k);
+						do{
+							int write = session.writeBytesToChanel();
+							if (write==0) {
+								break;
+							}
+							clientAttachment.t.ioListener.writed(session);
+							
+							if(write ==-1){
+								client.close();
+								clientAttachment.t.ioListener.closedChannel(session);
+								break;
+							}
+							
+						}while(false);	
 					}
 				}
 			}
@@ -169,14 +145,17 @@ public class XIOService implements Runnable {
 	}
 
 
-	private void accept(SocketChannel client,XNetworkConfig config) throws IOException {
+	private NetSession<Request> accept(SocketChannel client,XNetworkConfig<Request> config) throws IOException {
 		client.configureBlocking(false);
 		client.setOption(StandardSocketOptions.TCP_NODELAY,config.tcpNoDelay);
 		client.setOption(StandardSocketOptions.SO_RCVBUF, config.rcvBuffer);
 		client.setOption(StandardSocketOptions.SO_SNDBUF, config.sendBuffer);
-		client.register(selector, SelectionKey.OP_READ,new Pair<ByteBuffer, XNetworkConfig>(ByteBuffer.allocate(config.rcvBuffer), config));
+		
+		NetSession<Request> session = config.newNetworkSession(client);
+		client.register(selector, SelectionKey.OP_READ,new Pair<NetSession<Request>, XNetworkConfig<Request>>(session, config));
+		return session;
 	}
-	public void newConnection(XNetworkConfig config)throws IOException {
+	public void newConnection(XNetworkConfig<Request> config)throws IOException {
 		SocketChannel socketChannel=SocketChannel.open();
 		socketChannel.configureBlocking(false);
 		socketChannel.setOption(StandardSocketOptions.TCP_NODELAY,config.tcpNoDelay);
@@ -184,8 +163,39 @@ public class XIOService implements Runnable {
 		socketChannel.setOption(StandardSocketOptions.SO_SNDBUF, config.sendBuffer);
 		socketChannel.connect(config.address);
 		
-		socketChannel.register(selector, SelectionKey.OP_CONNECT,new Pair<ByteBuffer, XNetworkConfig>(ByteBuffer.allocate(config.rcvBuffer), config));
+		NetSession<Request> session = config.newNetworkSession(socketChannel);
+		socketChannel.register(selector, SelectionKey.OP_CONNECT,new Pair<NetSession<Request>, XNetworkConfig<Request>>(session, config));
 		selector.wakeup();
 	}
+	public void newServerAccepter(List<XNetworkConfig<Request>> configs) throws IOException{
+		networkConfig = configs;
 
+		for (XNetworkConfig<Request> config :networkConfig) {
+			ServerSocketChannel server = ServerSocketChannel.open();
+			serverChannel.add(server);
+			
+			server.configureBlocking(false);
+			server.bind(config.address);
+			
+			port_app.put(server, config);
+			
+			server.register(selector,SelectionKey.OP_ACCEPT);
+		}
+		selector.wakeup();
+	}
+	public void start() throws IOException{
+		running = true;
+		selector = Selector.open();
+
+		Thread service = new Thread(this);
+		service.start();
+	}
+	@Override
+	public void changeInterestEvent(NetSession<Request> session, int event) throws ClosedChannelException {
+		session.getChannel().register(selector, event,
+				new Pair<NetSession<Request>, XNetworkConfig<Request>>(session, session.config));
+		if(wakeupLock.compareAndSet(1, 0)){
+			selector.wakeup();
+		}
+	}
 }

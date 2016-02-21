@@ -3,42 +3,6 @@ package http.protocol;
 import java.util.HashMap;
 import java.util.Map;
 
-/*
- *  <form enctype="1|2">
- *  Content-Type: application/x-www-form-urlencoded;charset=utf-8
- *  
- *  title=test&sub%5B%5D=1&sub%5B%5D=2&sub%5B%5D=3
- *  -----------------------------------------------------------------------------------------
- *  Content-Type:multipart/form-data; boundary=----WebKitFormBoundaryrGKCBY7qhFd3TrwA
- *  
- *  ------WebKitFormBoundaryrGKCBY7qhFd3TrwA
- *  Content-Disposition: form-data; name="text"
- *  
- *  title
- *  ------WebKitFormBoundaryrGKCBY7qhFd3TrwA
- *  Content-Disposition: form-data; name="file"; filename="chrome.png"
- *  Content-Type: image/png
- *  
- *  PNG ... content of chrome.png ...
- *  ------WebKitFormBoundaryrGKCBY7qhFd3TrwA--
- *  -----------------------------------------------------------------------------------------
- *  js ajax 3|4
- *  Content-Type: application/json;charset=utf-8
- *  
- *  {"title":"test","sub":[1,2,3]}
- *  -----------------------------------------------------------------------------------------
- *  Content-Type: text/xml
- *  
- *  <?xml version="1.0"?>
- *  <methodCall>
- *  	<methodName>examples.getStateName</methodName>
- *  	<params>
- *  		<param>
- *  			<value><i4>41</i4></value>
- *  		</param>
- *  	</params>
- *  </methodCall>
- */
 
 public class ContentType {
 	

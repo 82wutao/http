@@ -4,11 +4,11 @@ import http.api.ServerContext;
 import http.api.WebAppContext;
 import http.base.SimpleHttpRequest;
 import http.base.SimpleHttpResponse;
-import io.XBuffer;
 
 import java.io.IOException;
 import java.net.Socket;
 
+import common.io.XBuffer;
 import net.HttpProtocol;
 
 public class HttpProccesser implements Runnable {

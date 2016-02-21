@@ -3,11 +3,12 @@ package net;
 import http.HttpProccesser;
 import http.api.HttpResponse;
 import http.base.SimpleHttpRequest;
-import io.XBuffer;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.Charset;
+
+import common.io.XBuffer;
 
 public class HttpProtocol  {
 	

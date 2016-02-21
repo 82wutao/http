@@ -3,7 +3,6 @@ package http.base;
 import http.api.Cookie;
 import http.api.HttpResponse;
 import http.api.WebAppContext;
-import io.XBuffer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import common.io.XBuffer;
+
 import java.util.Set;
 
 public class SimpleHttpResponse implements HttpResponse {

@@ -1,13 +1,23 @@
 package net;
 
-import io.XBuffer;
+import net.kernel.NetSession;
 
-import java.nio.channels.SocketChannel;
-
-public interface IOListener {
-	public void opennedChannel(SocketChannel channel);
-	public void connectedChannel(SocketChannel channel);
-	public void readable(SocketChannel channel,XBuffer buffer);
-	public void writeable(SocketChannel channel);
-	public void closedChannel(SocketChannel channel);
+/**
+ * 
+ * @author wutao
+ *
+ * @param <T> 会话子类型
+ * @param <R> 请求
+ */
+public interface IOListener<Request> {
+	public void opennedChannel(NetSession<Request> session);
+	public void connectedChannel(NetSession<Request> session);
+	/**
+	 * 解析成功返回,请求对象,否则返回null
+	 * @param session
+	 * @return
+	 */
+	public Request readable(NetSession<Request> session);
+	public void writed(NetSession<Request> session);
+	public void closedChannel(NetSession<Request> session);
 }
