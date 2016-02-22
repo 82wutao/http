@@ -112,9 +112,15 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 								clientAttachment.t.ioListener.closedChannel(session);
 								break;
 							}
-							
+							//TODO post a file?
 							while(session.readableBufferRemaining()>0){
-								clientAttachment.t.ioListener.readable(session);
+								Request request =clientAttachment.t.ioListener.readable(session);
+								if (request !=null) {
+									//TODO async handler
+									clientAttachment.t.appHandler.handle(session, request);
+									continue;
+								}
+								break;
 							}
 						}while(false);						
 					}

@@ -277,9 +277,9 @@ public interface HttpResponse {
 
 	public void setStatusCode(int code);
 
-	public void setContentType(String type);
-
 	public void setContentLength(long lenght);
+	public void setContentType(String type);
+	public void setCharset(String charset);
 
 	public void write(byte[] data, int off, int length);
 
@@ -287,7 +287,7 @@ public interface HttpResponse {
 
 	public void write(File file);
 
-	public void serialize(OutputStream outputStream) throws IOException;
+	public void flush();
 
 	public void addCookie(Cookie cookie);
 }

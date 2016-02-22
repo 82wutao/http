@@ -257,21 +257,23 @@ public interface HttpRequest {
 	 */
 	public static final String X_Csrf_Token = "X-Csrf-Token";
 
-	public Map<String, String> getRequestHeads();
-
-	public String getRequestHead(String key);
 
 	public String getRequestMethod();
-
+	public String getRequestUri();
 	public String getHttpVersion();
 
-	public String getRequestUri();
-
+	public Map<String, String> getRequestHeads();
+	public String getRequestHead(String key);
 	public String getContentLength();
-
-	public String getParamerValue(String paramer);
+	public String getContentType();
+	public String getCharset();
 
 	public Cookie[] getCookies();
+	
+	public MultiPartForm getRequestBody();
+
+	public String getParamerValue(String paramer);
+/////////////////////////////////
 
 	public int readFromBody(byte[] buffer) throws IOException;
 

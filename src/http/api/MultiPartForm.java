@@ -11,6 +11,7 @@ import common.io.XBuffer;
  * @author wutao
  *
  */
+//TODO rename Body
 public class MultiPartForm {
 	public static final String Part_File = "File";
 	public static final String Part_Paramater = "Param";
