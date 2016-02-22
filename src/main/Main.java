@@ -1,12 +1,12 @@
 package main;
 
+import http.HttpProtocol;
 import http.HttpServerContext;
 import http.api.ServerContext;
 
 import java.io.File;
 import java.io.IOException;
 
-import net.HttpProtocol;
 import net.kernel.IOService;
 import net.kernel.NetworkConfig;
 

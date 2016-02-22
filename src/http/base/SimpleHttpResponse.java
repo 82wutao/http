@@ -3,11 +3,13 @@ package http.base;
 import http.api.Cookie;
 import http.api.HttpResponse;
 import http.api.WebAppContext;
+import net.kernel.NetSession;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,13 +30,12 @@ public class SimpleHttpResponse implements HttpResponse {
 	private File document = null;
 	private XBuffer buffer=null;
 	private List<byte[]> content = new ArrayList<byte[]>();
-private long bodySize =0;
+	private long bodySize =0;
 
 	private WebAppContext appContext = null;
 
-	public SimpleHttpResponse(WebAppContext appContext,XBuffer outBuffer) {
+	public SimpleHttpResponse(WebAppContext appContext,SocketChannel channel) {
 		this.appContext = appContext;
-		buffer = outBuffer;
 		headMap.put(HttpResponse.Head_Connection_Response, "close");
 	}
 
@@ -156,5 +157,17 @@ private long bodySize =0;
 			}
 		}
 
+	}
+
+	@Override
+	public void setCharset(String charset) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void flush() {
+		// TODO Auto-generated method stub
+		
 	}
 }

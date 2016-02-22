@@ -1,6 +1,5 @@
-package net;
+package http;
 
-import http.HttpProccesser;
 import http.api.HttpResponse;
 import http.base.SimpleHttpRequest;
 import http.protocol.HttpVersions;
@@ -51,7 +50,7 @@ public class HttpProtocol  {
 	}
 	
 	
-	public boolean parseProtocol(ByteBuffer buffer){
+	public boolean parseProtocol(ByteBuffer buffer) throws Exception{
 		while(currentState < Parse_State_AfterHead){
 			switch (currentState) {
 			case Parse_State_Begin:
@@ -84,7 +83,7 @@ public class HttpProtocol  {
 
 		return false;
 	}
-	protected void parseVerb(ByteBuffer buffer) {
+	protected void parseVerb(ByteBuffer buffer) throws Exception {
 		int remaining = buffer.remaining();
 		
 	    int position = buffer.position();
@@ -117,7 +116,7 @@ public class HttpProtocol  {
 	private static final int Path_State_Path=1;
 	private static final int Path_State_Name=2;
 	private static final int Path_State_Value=3;
-	protected void parsePath(ByteBuffer buffer) {
+	protected void parsePath(ByteBuffer buffer) throws Exception {
 	    /*
 	     *  /path?k=v&k=v
 	     */
@@ -126,7 +125,7 @@ public class HttpProtocol  {
 	    	int c =buffer.get();
 	    	if (c == '\r' 
 	    			|| c == '\n') {
-	    		throw new Exception("failed To Parse Http-Method");
+	    		throw new Exception("failed To Parse Http-Path");
 	    	}
 	    	boolean append=true;
 	    	switch (substate) {
@@ -335,7 +334,7 @@ public class HttpProtocol  {
 		
 		return request;
 	}
-	protected void base64Decode(){
+	protected void base64Decode() throws IOException{
 		int decode =this.uri.indexOf('%');
 		if (decode != -1) {
 			sun.misc.BASE64Decoder decoder =new sun.misc.BASE64Decoder();

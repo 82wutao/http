@@ -3,6 +3,7 @@ package http.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.nio.channels.SocketChannel;
 
 import common.io.XBuffer;
 
@@ -11,8 +12,7 @@ import common.io.XBuffer;
  * @author wutao
  *
  */
-//TODO rename Body
-public class MultiPartForm {
+public class HttpRequestBody {
 	public static final String Part_File = "File";
 	public static final String Part_Paramater = "Param";
 
@@ -21,7 +21,7 @@ public class MultiPartForm {
 	private XBuffer buffer = null;
 	private long bodyLength;
 
-	private InputStream inputStream = null;
+	private SocketChannel inputStream = null;
 	private long readed;
 
 	private String type = null;
@@ -30,8 +30,8 @@ public class MultiPartForm {
 	private String fileName = null;
 	private boolean partEnd=false;
 
-	public MultiPartForm(long bodyLength, byte[] boundary, XBuffer bodyBegin,
-			InputStream inputStream) {
+	public HttpRequestBody(long bodyLength, byte[] boundary, XBuffer bodyBegin,
+			SocketChannel inputStream) {
 		this.boundary = boundary;
 		this.bodyLength = bodyLength;
 		this.buffer = bodyBegin;

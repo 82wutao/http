@@ -270,16 +270,16 @@ public interface HttpRequest {
 
 	public Cookie[] getCookies();
 	
-	public MultiPartForm getRequestBody();
+	public HttpRequestBody getRequestBody();
 
 	public String getParamerValue(String paramer);
 /////////////////////////////////
-
-	public int readFromBody(byte[] buffer) throws IOException;
-
-	public String dumpHead();
-
-	public String dumpBody();
-
-	public MultiPartForm getMultiPartForm();
+//
+//	public int readFromBody(byte[] buffer) throws IOException;
+//
+//	public String dumpHead();
+//
+//	public String dumpBody();
+//
+//	public MultiPartForm getMultiPartForm();
 }
