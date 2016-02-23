@@ -31,7 +31,7 @@ public class NetSession<Request> {
 		sendQueue=new ArrayDeque<ByteBuffer>();
 	}
 	
-	SocketChannel getChannel() {
+	public SocketChannel getChannel() {
 		return channel;
 	}	
 	public boolean isQuick() {

@@ -1,7 +1,11 @@
 package http;
 
+import http.api.HttpRequest;
+import http.api.HttpRequestBody;
 import http.api.HttpResponse;
 import http.base.SimpleHttpRequest;
+import http.protocol.HttpHeaders;
+import http.protocol.HttpMethods;
 import http.protocol.HttpVersions;
 
 import java.io.IOException;
@@ -15,7 +19,7 @@ import java.util.Map.Entry;
 
 import common.io.XBuffer;
 
-public class HttpProtocol  {
+public class HttpProtocol  implements HttpRequest {
 	public static final int Parse_State_Begin=0;
 	public static final int Parse_State_Verb=1;
 	public static final int Parse_State_Path=2;
@@ -51,7 +55,7 @@ public class HttpProtocol  {
 	
 	
 	public boolean parseProtocol(ByteBuffer buffer) throws Exception{
-		while(currentState < Parse_State_AfterHead){
+		while(currentState <= Parse_State_AfterHead){
 			switch (currentState) {
 			case Parse_State_Begin:
 			case Parse_State_Verb:
@@ -70,14 +74,20 @@ public class HttpProtocol  {
 				parseHeaderValue(buffer);
 				break;
 			case Parse_State_AfterHead:
+				if (verb.equals(HttpMethods.Http11_POST)
+						||verb.equals(HttpMethods.Http11_PUT)) {
+					currentState = Parse_State_Body;
+				}else {
+					currentState = Parse_State_Finish;
+				}
 				return true;
-			case Parse_State_Body:
-				
-				break;
-			case Parse_State_Finish:
-				
-				return true;
-	
+//			case Parse_State_Body:
+//				
+//				break;
+//			case Parse_State_Finish:
+//				
+//				return true;
+//	
 			}
 		}
 
@@ -275,65 +285,7 @@ public class HttpProtocol  {
 			stringBuilder.setLength(0);			
 		}
 	}
-	/***
-	 * 
-	 * @param buffer
-	 * @param off
-	 * @param length
-	 * @return endOfHead
-	 */
-	private int parseProtocol(byte[] buffer,int off,int length){
-
-		int index =off;
-		while (index < length) {
-			int ch=buffer[index];
-			
-			if (ch=='\n') {
-				
-				if (buffer[index+2]=='\n') {
-					return (index-1);
-				}
-			}
-			index++;
-		}
-		return 0;
-	}
 	
-	public SimpleHttpRequest decode(Socket session,HttpProccesser proccesser) throws IOException{
-		XBuffer buffer=proccesser.buffer;
-		if (buffer==null) {
-			buffer = new XBuffer(4096);
-			buffer.readyWritingToBuffer();
-		}
-		int off=buffer.getPosition();
-		int limit = buffer.getLimit();
-		byte[] buff=buffer.getData();
-		
-		int readed=session.getInputStream().read(buff, off, limit-off);
-		if (readed<=0) {
-			return null;
-		}
-		
-		
-		int endOfHead=parseProtocol(buff, 0, off+readed);
-		if (endOfHead==0) {
-			buffer.setPosition(off+readed);
-			return null;
-		}
-		
-		buffer.setLimit(endOfHead);
-		SimpleHttpRequest request = new SimpleHttpRequest(session);
-		request.setHead(buffer);
-		
-		if (endOfHead + 4 < (off + readed)) {
-			XBuffer body = buffer.cloneSelf();
-			body.setPosition(endOfHead + 4);
-			body.setLimit(off + readed);
-			request.bodyBegin(body);
-		}
-		
-		return request;
-	}
 	protected void base64Decode() throws IOException{
 		int decode =this.uri.indexOf('%');
 		if (decode != -1) {
@@ -362,8 +314,92 @@ public class HttpProtocol  {
 		}
 		
 	}
-	public void encode(Socket session,HttpResponse response) throws IOException {
-		response.serialize(session.getOutputStream());
+
+
+	@Override
+	public String getRequestMethod() {
+		return verb;
 	}
+
+
+	@Override
+	public String getRequestUri() {
+		return uri;
+	}
+
+
+	@Override
+	public String getHttpVersion() {
+		return version;
+	}
+
+
+	@Override
+	public Map<String, String> getRequestHeads() {
+		return headers;
+	}
+
+
+	@Override
+	public String getRequestHead(String key) {
+		return headers.get(key);
+	}
+
+
+	@Override
+	public String getContentLength() {
+		return headers.get(HttpRequest.Content_Length);
+	}
+
+
+	@Override
+	public String getContentType() {
+		return headers.get(HttpRequest.Content_Type);
+	}
+
+
+	@Override
+	public String getCharset() {
+		String value =headers.get(HttpRequest.Content_Type);
+		String set =HttpHeaders.extractQuotedValueFromHeader(value, "charset");
+		if (set==null
+				||set.equals("")) {
+			set=this.charset.displayName();
+		}else {
+			this.charset = Charset.forName(set);
+		}
+		return set;
+	}
+
+
+	@Override
+	public http.api.Cookie[] getCookies() {
+		String value =headers.get(HttpRequest.Cookie);
+		String[] cookie = value.split("; ");
+		return null;
+		//TODO 
+	}
+
+
+	@Override
+	public HttpRequestBody getRequestBody() {
+		return null;
+	}
+
+
+	@Override
+	public String getParamerValue(String paramer) {
+		String[] value =this.paramaters.get(paramer);
+		if (value ==null
+				||value.length==0){
+			if (!verb.equals(HttpMethods.Http11_POST)
+					&&!verb.equals(HttpMethods.Http11_PUT)) {
+				return null;
+			}
+			//TODO parse body
+		}
+		return this.paramaters.get(paramer)[0]; 
+	}
+
 	
 }
