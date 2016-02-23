@@ -139,15 +139,6 @@ public class SimpleHttpRequest implements HttpRequest {
 		bodyBegin = buffer;
 	}
 
-	@Override
-	public String dumpHead() {
-		return head_str;
-	}
-
-	@Override
-	public String dumpBody() {
-		return null;
-	}
 
 	public boolean parseParamers() throws IOException {
 		String method = getRequestMethod();

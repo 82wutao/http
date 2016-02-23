@@ -2,22 +2,17 @@ package http;
 
 import http.api.HttpRequest;
 import http.api.HttpRequestBody;
-import http.api.HttpResponse;
-import http.base.SimpleHttpRequest;
 import http.protocol.HttpHeaders;
 import http.protocol.HttpMethods;
-import http.protocol.HttpVersions;
 
 import java.io.IOException;
-import java.net.Socket;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import common.io.XBuffer;
+import net.kernel.NetSession;
 
 public class HttpProtocol  implements HttpRequest {
 	public static final int Parse_State_Begin=0;
@@ -40,17 +35,22 @@ public class HttpProtocol  implements HttpRequest {
 
 	private Map<String, String[]> paramaters=new HashMap<String, String[]>();
 	
+	private NetSession<HttpProtocol> session;
+	
 	private String verb;
 	private String uri;
 	private String version;
 	
 	private Map<String, String> headers =new HashMap<String, String>();
+	private HttpRequestBody body =null;
 
-	public HttpProtocol(Charset charset) {
+	public HttpProtocol(Charset charset,NetSession<HttpProtocol> netSession) {
 		this.charset = charset;
 		currentState =Parse_State_Begin;
 		substate=0;
 		stringBuilder.setLength(0);
+		
+		session = netSession;
 	}
 	
 	
@@ -382,10 +382,62 @@ public class HttpProtocol  implements HttpRequest {
 
 
 	@Override
-	public HttpRequestBody getRequestBody() {
-		return null;
+	public HttpRequestBody getRequestBody() throws IOException {
+		if (body != null) {
+			return body;
+		}
+		if (!verb.equals(HttpMethods.Http11_POST)
+				&& !verb.equals(HttpMethods.Http11_PUT)) {
+			return null;
+		}
+		parseBody();
+		return body;
 	}
+	
+	protected void parseBody() throws IOException {
+	
+		if (verb.equals("POST")) {
+			String contentTypeHeader = headers.get(Content_Type);
+			String contentLengthHeader=headers.get(Content_Length);
+			
+			if (contentTypeHeader.startsWith("application/x-www-form-urlencoded")) {
+				int length = Integer.parseInt(contentLengthHeader);
+				
+				for(int sum =0, handled=0;sum < length;sum = sum +handled){
+					handled =0;
 
+					for (int c = session.read(); c!=-1 ; handled++) {
+						if (c =='=') {
+							temp_name = stringBuilder.toString();
+							stringBuilder.setLength(0);
+							continue;
+						}
+						else if (c =='&') {
+							String value = stringBuilder.toString();
+							paramaters.put(temp_name, new String[]{value});
+							stringBuilder.setLength(0);
+							continue;
+						}
+						stringBuilder.append((char)c);
+					}
+					if (sum + handled == length) {
+						String value = stringBuilder.toString();
+						paramaters.put(temp_name, new String[]{value});
+						stringBuilder.setLength(0);
+					}else {
+						session.readBytesFromChanel();
+					}
+					
+				}
+			}else if (contentTypeHeader.trim().startsWith("multipart/form-data") ){
+				String[] type_split= contentTypeHeader.trim().split(";");
+				String boundary=type_split[1].trim().split("=")[1];
+				byte[] boundaryBytes=boundary.getBytes(charset);
+				this.body=new HttpRequestBody(Long.parseLong(contentLengthHeader.trim()),boundaryBytes, session,charset.displayName());
+			}
+			
+		}
+	}
 
 	@Override
 	public String getParamerValue(String paramer) {
@@ -396,7 +448,11 @@ public class HttpProtocol  implements HttpRequest {
 					&&!verb.equals(HttpMethods.Http11_PUT)) {
 				return null;
 			}
-			//TODO parse body
+			try {
+				parseBody();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return this.paramaters.get(paramer)[0]; 
 	}

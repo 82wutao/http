@@ -132,12 +132,16 @@ public class NetSession<Request> {
 	public int readableBufferRemaining(){
 		return readableBuffer.remaining();
 	}
-	int readBytesFromChanel() throws IOException{
+	public int readBytesFromChanel() throws IOException{
 //		readableBuffer.rewind();//position comebing 0;for read again
 		readableBuffer.compact();//take bytes unreaded to the begin,position is after bytes ,limit is capacity ,for write 2 self 
 		int readed = channel.read(readableBuffer);
 		readableBuffer.flip();//for read from self
 		return readed;
+	}
+	public void skipRead(int skip){
+		int position = readableBuffer.position();
+		readableBuffer.position(position + skip);
 	}
 	public int read(XBuffer dest){
 		int remaining =readableBuffer.remaining();
@@ -170,11 +174,11 @@ public class NetSession<Request> {
 		return new String(bytes, offset, length, charset);
 	}
 	public int read(byte[] dest,int offset){
-		int length = dest.length - offset;
 		int remaining = readableBuffer.remaining();
 		if (remaining ==0) {
 			return -1;
 		}
+		int length = dest.length - offset;
 		if (remaining < length) {
 			readableBuffer.get(dest,offset,remaining);
 			return remaining;

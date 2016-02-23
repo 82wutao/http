@@ -270,7 +270,7 @@ public interface HttpRequest {
 
 	public Cookie[] getCookies();
 	
-	public HttpRequestBody getRequestBody();
+	public HttpRequestBody getRequestBody()throws IOException;
 
 	public String getParamerValue(String paramer);
 /////////////////////////////////
