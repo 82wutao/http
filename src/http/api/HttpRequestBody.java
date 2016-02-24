@@ -1,19 +1,12 @@
 package http.api;
 
-import http.HttpProtocol;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URLDecoder;
-import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import http.HttpProtocol;
 import net.kernel.NetSession;
-
-import common.io.XBuffer;
 
 /**
  * 
@@ -25,7 +18,6 @@ public class HttpRequestBody {
 	public static final String Part_Paramater = "Param";
 
 	private byte[] boundary = null;
-	private ArrayList<Byte> boundary_check = new ArrayList<Byte>();
 	
 	private String charset = null;
 	private long bodyLength;
@@ -45,13 +37,21 @@ public class HttpRequestBody {
 		this.charset = charset;
 	}
 
-	public boolean hasMorePart() throws IOException {
+	/**
+	 * 
+	 * @return -1 this part has more bytes,you should read it|0 no more part|1 has more part 
+	 * @throws IOException
+	 */
+	public int hasMorePart() throws IOException {
+		if (!partEnd) {
+			return -1;
+		}
 		if (session.readableBufferRemaining()==0) {
-			return false;
+			return 0;
 		}
 		if (readed + boundary.length + 6 == bodyLength) {//--~--\r\n
 			skipBytes(boundary.length + 6);
-			return false;
+			return 0;
 		}
 		
 		skipBytes(boundary.length + 4);//--boundary\r\n		
@@ -78,7 +78,7 @@ public class HttpRequestBody {
 			
 			parameters.put(paramName, new String[]{val});
 			partEnd=true;
-			return true;
+			return 1;
 		}
 		
 		this.type = HttpRequestBody.Part_File;
@@ -93,7 +93,7 @@ public class HttpRequestBody {
 		fileName = nameField[1].trim().substring(1,
 				nameField[1].trim().length() - 1);
 		partEnd=false;
-		return true;
+		return 1;
 	}
 	private String readline() throws IOException{
 		StringBuilder builder = new StringBuilder();
@@ -136,87 +136,29 @@ public class HttpRequestBody {
 		return type;
 	}
 
-	//TODO first read boundary's length;second read more as you can
 	public int read(byte[] destBuffer) throws IOException {
 		if (partEnd) {
 			return -1;
 		}
 		
-		//TODO boundary_check is not empty
-		
-		int destLength = destBuffer.length;
-		int destLimit=0;
-		
-		destLimit=session.read(destBuffer, 0);//TODO 根据boundary 来定义offset
-		
-		
+		int destLimit=session.read(destBuffer, 0);
 		for (int i = 0; i < destLimit; i++) {
-			
 			int ret =isBoundary(destBuffer,i,destLimit);
 			if (ret == 0) {
 				destLimit = i;
-				//TODO src buffer pos ？
-				 
-				for (int j = i; j < destLimit; j++) {
-					boundary_check.add(destBuffer[j]);
-				}
+				session.backRead(destLimit - i);
 				break;
 			}
 			if (ret == 1) {
-				readed += 2;//\r\n(--boundary)
+				partEnd =true;
+				readed += 2;//\r\n(--boundary\r\n|--)
 				destLimit = i;
-				//TODO src buffer pos ？
+				session.backRead(destLimit - i+2);
 				break;
 			}
 			readed++;
 		}
 		return destLimit;
-		
-		int destSize =destBuffer.length;
-		int destIndex=0;
-		
-		buffer.compact();
-
-		int begin = buffer.getPosition();
-		int limit = buffer.getLimit();
-		byte[] data = buffer.getData();
-		
-
-		if (readed + begin < bodyLength) {
-			long unreaded = bodyLength - readed;
-			long space =  limit - begin;
-			int ret = inputStream.read(data, begin, (int)(space < unreaded?space:unreaded));
-			buffer.setPosition(begin + ret);			
-		}
-		buffer.readyReadingFromBuffer();
-		begin = buffer.getPosition();
-		limit = buffer.getLimit();
-		
-		for (int i = begin; 
-				i < limit & destIndex<destSize; 
-				i++) {
-			int ret =isBoundary(data,i,limit);
-			if (ret==0) {
-				partEnd=false;
-				break;
-			}
-			if (ret==1) {
-				partEnd=true;
-				break;
-			}
-			
-			destBuffer[destIndex]=data[i];
-			destIndex++;
-		}
-
-		if (partEnd) {
-			buffer.setPosition(begin+destIndex+2);
-			readed += destIndex+2;
-		}else {
-			buffer.setPosition(begin+destIndex);
-			readed += destIndex;
-		}
-		return destIndex;
 	}
 
 	public String[] getParameter(String name) {

@@ -143,11 +143,19 @@ public class NetSession<Request> {
 		int position = readableBuffer.position();
 		readableBuffer.position(position + skip);
 	}
-	public int read(XBuffer dest){
-		int remaining =readableBuffer.remaining();
-		if (remaining ==0) {
-			return -1;
+	public void backRead(int back){
+		int position = readableBuffer.position();
+		readableBuffer.position(position - back);
+	}
+	public int read(XBuffer dest) throws IOException{
+		if (!readableBuffer.hasRemaining()) {
+			int readed = readBytesFromChanel();
+			if (readed == -1) {
+				return -1;
+			}
 		}
+		
+		int remaining =readableBuffer.remaining();
 		byte[] bytes = dest.getData();
 		int off = dest.getPosition();
 		int length = dest.getLimit() - off;
@@ -162,22 +170,16 @@ public class NetSession<Request> {
 			return remaining;
 		}	
 	}
-	public String read(Charset charset){
-		int length =readableBuffer.remaining();
-		if (length==0) {
-			return null;
+
+	public int read(byte[] dest,int offset) throws IOException{
+		if (!readableBuffer.hasRemaining()) {
+			int readed = readBytesFromChanel();
+			if (readed == -1) {
+				return -1;
+			}
 		}
-		int offset =readableBuffer.position();
-		byte[] bytes = readableBuffer.array();
-		readableBuffer.position(offset+length);
 		
-		return new String(bytes, offset, length, charset);
-	}
-	public int read(byte[] dest,int offset){
 		int remaining = readableBuffer.remaining();
-		if (remaining ==0) {
-			return -1;
-		}
 		int length = dest.length - offset;
 		if (remaining < length) {
 			readableBuffer.get(dest,offset,remaining);
@@ -186,9 +188,12 @@ public class NetSession<Request> {
 		readableBuffer.get(dest,offset,length);
 		return length;
 	}
-	public byte read(){
-		if (readableBuffer.remaining()<1) {
-			return -1;
+	public byte read() throws IOException{
+		if (!readableBuffer.hasRemaining()) {
+			int readed = readBytesFromChanel();
+			if (readed == -1) {
+				return -1;
+			}
 		}
 		return readableBuffer.get();
 	}
