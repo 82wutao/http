@@ -25,6 +25,8 @@ public class PostGameMsgHandler implements Handler<HttpProtocol> {
 		System.out.println("\\r\\n");
 
 		SimpleHttpResponse response=new SimpleHttpResponse(session);
+		response.setCharset("UTF-8");
+		
 		response.setHttpVersion(version);
 
 		
