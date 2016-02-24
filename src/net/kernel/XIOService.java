@@ -93,6 +93,7 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 						SocketChannel client= server.accept();
 						NetSession<Request> session=accept(client,app);
 						app.ioListener.opennedChannel(session);
+						continue;
 					}
 					
 					SocketChannel client =(SocketChannel)key.channel();
@@ -107,13 +108,20 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 						int read = session.readBytesFromChanel();
 						
 						do{
+							
 							if(read ==-1){
 								client.close();
 								clientAttachment.t.ioListener.closedChannel(session);
 								break;
 							}
+							if (read==0) {
+								System.out.println("read is 0");
+								break;
+							}
 							while(session.readableBufferRemaining()>0){
+								System.out.println("reading");
 								Request request =clientAttachment.t.ioListener.readable(session);
+								System.out.println("end reading");
 								if (request !=null) {
 									//TODO async handler
 									clientAttachment.t.appHandler.handle(session, request);
@@ -174,7 +182,8 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 	}
 	public void newServerAccepter(List<XNetworkConfig<Request>> configs) throws IOException{
 		networkConfig = configs;
-
+		
+				
 		for (XNetworkConfig<Request> config :networkConfig) {
 			ServerSocketChannel server = ServerSocketChannel.open();
 			serverChannel.add(server);
@@ -189,6 +198,7 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 		selector.wakeup();
 	}
 	public void start() throws IOException{
+		serverChannel = new ArrayList<ServerSocketChannel>();
 		running = true;
 		selector = Selector.open();
 

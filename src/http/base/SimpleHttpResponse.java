@@ -1,42 +1,38 @@
 package http.base;
 
-import http.api.Cookie;
-import http.api.HttpResponse;
-import http.api.WebAppContext;
-import net.kernel.NetSession;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import common.io.XBuffer;
-
 import java.util.Set;
 
+import common.io.XBuffer;
+import http.api.Cookie;
+import http.api.HttpResponse;
+import http.protocol.ContentType;
+import net.kernel.NetSession;
+
 public class SimpleHttpResponse implements HttpResponse {
+	private NetSession<HttpProtocol> session;
+	
 	Map<String, String> headMap = new HashMap<String, String>();
 
 	String pv = null;
 	String statusCode = "200";
 
 	private File document = null;
-	private XBuffer buffer=null;
-	private List<byte[]> content = new ArrayList<byte[]>();
+	
+	private String charset=null;
+	private XBuffer buffer=new XBuffer(4096);
 	private long bodySize =0;
 
-	private WebAppContext appContext = null;
 
-	public SimpleHttpResponse(WebAppContext appContext,SocketChannel channel) {
-		this.appContext = appContext;
-		headMap.put(HttpResponse.Head_Connection_Response, "close");
+	public SimpleHttpResponse(NetSession<HttpProtocol> session) {
+		headMap.put(HttpResponse.Connection, "close");
+		this.session = session;
 	}
 
 	@Override
@@ -61,24 +57,25 @@ public class SimpleHttpResponse implements HttpResponse {
 
 	@Override
 	public void setContentType(String type) {
-		headMap.put(Head_ContentType_Response, type);
+		headMap.put(Content_Type, type);
 	}
 
 	@Override
 	public void setContentLength(long lenght) {
-		headMap.put(Head_ContentLength_Response, lenght + "");
+		headMap.put(Content_Length, lenght + "");
 	}
 
 	@Override
 	public void write(byte[] data, int off, int length) {
+		bodySize += (data.length-off);
+		buffer.writebytes(data, off, data.length);
 	}
 
 	@Override
 	public void write(String text) {
-		byte[] data = text.getBytes(Charset.forName("UTF8"));
+		byte[] data = text.getBytes(Charset.forName(charset));
 		bodySize+=data.length;
-		this.content.add(data);
-		
+		buffer.writebytes(data, 0, data.length);
 	}
 
 	@Override
@@ -93,7 +90,7 @@ public class SimpleHttpResponse implements HttpResponse {
 		}
 
 		int subfix=name_fix.length-1;
-		String typeString = appContext.mimeType(name_fix[subfix].trim());
+		String typeString = ContentType.getMimeType(name_fix[subfix].trim());
 		this.setContentType(typeString);	
 	}
 
@@ -103,43 +100,44 @@ public class SimpleHttpResponse implements HttpResponse {
 	}
 
 	@Override
-	public void serialize(OutputStream outputStream) throws IOException {
-		String contentType = headMap
-				.get(HttpResponse.Head_ContentType_Response);
-		if (contentType == null) {
-			headMap.put(HttpResponse.Head_ContentType_Response, "text/plain");
-		}
-		headMap.put(Head_ContentLength_Response, ""+bodySize);
+	public void setCharset(String charset) {
+		this.charset = charset;
+	}
+
+	@Override
+	public void flush() throws IOException {
 		
-		byte[] version = pv.getBytes(Charset.forName("ASCII"));
-		outputStream.write(version);
+		String contentType = headMap
+				.get(HttpResponse.Content_Type);
+		if (contentType == null) {
+			headMap.put(HttpResponse.Content_Type, "text/plain");
+		}
+		headMap.put(Content_Length, ""+bodySize);
+		
+		byte[] version = pv.getBytes(Charset.forName(charset));
+		session.write(version, 0, version.length);
 
-		outputStream.write(' ');
-		byte[] status = statusCode.getBytes(Charset.forName("ASCII"));
-		outputStream.write(status);
+		session.write((byte)(' '));
+		byte[] status = statusCode.getBytes(Charset.forName(charset));
+		session.write(status,0,status.length);
 
-		byte[] line = "\r\n".getBytes(Charset.forName("ASCII"));
-		outputStream.write(line);
+		byte[] line = "\r\n".getBytes(Charset.forName(charset));
+		session.write(line,0,line.length);
 
 		Set<Entry<String, String>> headers = headMap.entrySet();
 		for (Entry<String, String> entry : headers) {
-			byte[] key = entry.getKey().getBytes(Charset.forName("ASCII"));
-			byte[] value = entry.getValue().getBytes(Charset.forName("ASCII"));
-			outputStream.write(key);
-			outputStream.write(':');
-			outputStream.write(value);
-
-			outputStream.write(line);
+			String headLine = entry.getKey()+": "+entry.getValue()+"\r\n";
+//			byte[] key = entry.getKey().getBytes(Charset.forName(charset));
+//			byte[] value = entry.getValue().getBytes(Charset.forName(charset));
+			
+			byte[] header = headLine.getBytes(Charset.forName(charset));
+			session.write(header,0,header.length);
 		}
-		outputStream.write(line);
+		session.write(line,0,line.length);
 
-		if (!content.isEmpty()) {
-			for (byte[] text : content) {
-				if (text==null) {
-					continue;
-				}
-				outputStream.write(text);
-			}
+		buffer.readyReadingFromBuffer();
+		if (buffer.remain()>1) {
+			session.write(buffer.getData(),buffer.getPosition(),buffer.getLimit() - buffer.getPosition());
 		}
 		
 		if (document != null ) {
@@ -150,24 +148,11 @@ public class SimpleHttpResponse implements HttpResponse {
 			try {
 				for (int readed = inputStream.read(array, 0, length); readed > 0; readed = inputStream
 						.read(array, 0, length)) {
-					outputStream.write(array, 0, readed);
+					session.write(array, 0, readed);
 				}
 			} finally {
 				inputStream.close();
 			}
 		}
-
-	}
-
-	@Override
-	public void setCharset(String charset) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void flush() {
-		// TODO Auto-generated method stub
-		
 	}
 }

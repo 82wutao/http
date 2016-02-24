@@ -326,9 +326,8 @@ public class XBuffer implements PoolableObject{
 	}
 
 	public void writebytes(byte[] value, int offset, int arr_len) {
-		if ((this.index + arr_len) > this.limit) {
-			return;
-		}
+		moreBuffer(this,arr_len);
+		
 		System.arraycopy(value,offset,data, index, arr_len);
 		this.index += arr_len;
 	}
@@ -354,6 +353,8 @@ public class XBuffer implements PoolableObject{
 	}
 	public void writeString(String str,Charset PROTOCOL_CHARSET){
 		byte[] bytes=str.getBytes(PROTOCOL_CHARSET);
+		moreBuffer(this,bytes.length);
+		
 		writeshort((short)bytes.length,1);
 		writebytes(bytes, 0, bytes.length);
 	}
