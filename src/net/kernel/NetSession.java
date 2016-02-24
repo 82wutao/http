@@ -19,7 +19,7 @@ public class NetSession<Request> {
 	protected XNetworkConfig<Request> config=null;
 	protected ChannelInterestEvent<Request> channelInterestEvent;
 	
-	protected NetSession(ChannelInterestEvent<Request> channelInterestEvent,XNetworkConfig<Request> networkConfig,SocketChannel socketChannel
+	public NetSession(ChannelInterestEvent<Request> channelInterestEvent,XNetworkConfig<Request> networkConfig,SocketChannel socketChannel
 			,boolean quick
 			,int readBufferSize,int sendBufferSize) {
 		this.channelInterestEvent = channelInterestEvent;
@@ -134,7 +134,12 @@ public class NetSession<Request> {
 	}
 	public int readBytesFromChanel() throws IOException{
 //		readableBuffer.rewind();//position comebing 0;for read again
-		readableBuffer.compact();//take bytes unreaded to the begin,position is after bytes ,limit is capacity ,for write 2 self 
+		if (readableBuffer.position() ==0
+				&&readableBuffer.limit()==readableBuffer.capacity()) {
+			
+		}else {			
+			readableBuffer.compact();//take bytes unreaded to the begin,position is after bytes ,limit is capacity ,for write 2 self 
+		}
 		int readed = channel.read(readableBuffer);
 		readableBuffer.flip();//for read from self
 		return readed;

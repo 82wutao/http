@@ -1,4 +1,4 @@
-package http;
+package http.base;
 
 import http.api.HttpRequest;
 import http.api.HttpRequestBody;
@@ -54,24 +54,26 @@ public class HttpProtocol  implements HttpRequest {
 	}
 	
 	
-	public boolean parseProtocol(ByteBuffer buffer) throws Exception{
+	public boolean parseProtocol() throws Exception{
+		
 		while(currentState <= Parse_State_AfterHead){
+			System.out.println("parse protocol state is "+currentState);
 			switch (currentState) {
 			case Parse_State_Begin:
 			case Parse_State_Verb:
-				parseVerb(buffer);
+				parseVerb();
 				break;
 			case Parse_State_Path:
-				parsePath(buffer);
+				parsePath();
 				break;
 			case Parse_State_Version:
-				parseVersion(buffer);
+				parseVersion();
 				break;
 			case Parse_State_HeaderName:
-				parseHeaderName(buffer);
+				parseHeaderName();
 				break;
 			case Parse_State_HeaderValue:
-				parseHeaderValue(buffer);
+				parseHeaderValue();
 				break;
 			case Parse_State_AfterHead:
 				if (verb.equals(HttpMethods.Http11_POST)
@@ -93,14 +95,14 @@ public class HttpProtocol  implements HttpRequest {
 
 		return false;
 	}
-	protected void parseVerb(ByteBuffer buffer) throws Exception {
-		int remaining = buffer.remaining();
+	protected void parseVerb() throws Exception {
+		int remaining = session.readableBufferRemaining();
 		
-	    int position = buffer.position();
-	    int offset = 0;
 	    
-	    while(offset < remaining ){
-	    	int c =buffer.get(position + offset);
+	    while(remaining >0){
+	    	int c =session.read();
+	    	remaining--;
+	    	
 	    	if (c == ' '|| c == '\t'){
 	    		verb = stringBuilder.toString().trim();
 	    		break;
@@ -110,9 +112,7 @@ public class HttpProtocol  implements HttpRequest {
                 throw new Exception("failed To Parse Http-Method");
             }
 	    	stringBuilder.append((char)c);
-	    	offset++;
 	    }
-	    buffer.position(position+offset+1);
 	    
 	    if (verb == null) {
 			return ;
@@ -126,17 +126,21 @@ public class HttpProtocol  implements HttpRequest {
 	private static final int Path_State_Path=1;
 	private static final int Path_State_Name=2;
 	private static final int Path_State_Value=3;
-	protected void parsePath(ByteBuffer buffer) throws Exception {
+	protected void parsePath() throws Exception {
 	    /*
 	     *  /path?k=v&k=v
 	     */
+		int remainning = session.readableBufferRemaining();
 		boolean compelet = false;
-	    while(buffer.hasRemaining()){
-	    	int c =buffer.get();
+	    while(remainning > 0){
+	    	int c =session.read();
+	    	remainning--;
+	    	
 	    	if (c == '\r' 
 	    			|| c == '\n') {
 	    		throw new Exception("failed To Parse Http-Path");
 	    	}
+	    	
 	    	boolean append=true;
 	    	switch (substate) {
 			case Path_State_Path:
@@ -198,6 +202,8 @@ public class HttpProtocol  implements HttpRequest {
 		    if (compelet) {
 				break ;
 			}
+		    
+		    
 	    }
 	    
 	    if (compelet == false) {
@@ -210,11 +216,13 @@ public class HttpProtocol  implements HttpRequest {
 	    stringBuilder.setLength(0);
 	    base64Decode();
 	}
-	protected void parseVersion(ByteBuffer buffer) {
-		
+	protected void parseVersion() throws IOException {
+		int remainning = session.readableBufferRemaining();
 		boolean comp=false;
-		while(buffer.hasRemaining()){
-			int c =buffer.get();
+		while(remainning>0){
+			int c = session.read();
+			remainning--;
+			
 			if (c == '\r' ){
 				continue;
 			}
@@ -231,12 +239,14 @@ public class HttpProtocol  implements HttpRequest {
 		}
 	}
 
-	protected void parseHeaderName(ByteBuffer buffer) {
+	protected void parseHeaderName() throws IOException {
 		boolean comp=false;
 		
-		String header_str = null;
-		while(buffer.hasRemaining()){
-			int c =buffer.get();
+		int remainning = session.readableBufferRemaining();
+		while(remainning > 0){
+			int c =session.read();
+			remainning--;
+			
 			if ( c == ':'){
 				comp =true;
 				break;
@@ -260,12 +270,15 @@ public class HttpProtocol  implements HttpRequest {
 			stringBuilder.setLength(0);			
 		}
 	}
-	protected void parseHeaderValue(ByteBuffer buffer) {
+	protected void parseHeaderValue() throws IOException {
 		boolean comp=false;
 		
 		String value_str = null;
-		while(buffer.hasRemaining()){
-			int c =buffer.get();
+		int remmainning = session.readableBufferRemaining();
+		while(remmainning > 0){
+			int c =session.read();
+			remmainning--;
+			
 			if ( c == '\r'){
 				continue;
 			}else if ( c == '\n'){

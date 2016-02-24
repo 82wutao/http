@@ -15,7 +15,7 @@ import app.terminal.Cmd;
 import http.api.HttpRequest;
 import http.api.HttpResponse;
 import http.api.HttpServerlet;
-import http.api.MultiPartForm;
+import http.api.HttpRequestBody;
 import http.api.WebAppContext;
 
 public class StaticDocumentServerlet implements HttpServerlet {
@@ -71,8 +71,8 @@ public class StaticDocumentServerlet implements HttpServerlet {
 
 	@Override
 	public void doPOST(WebAppContext context, HttpRequest request,
-			HttpResponse response) {
-		MultiPartForm form=request.getMultiPartForm();
+			HttpResponse response)throws Exception {
+		HttpRequestBody form=request.getRequestBody();
 		if (form!=null) {
 			handleMultiPartForm(context,request,response);
 		}
@@ -112,12 +112,12 @@ public class StaticDocumentServerlet implements HttpServerlet {
 
 	}
 	private void handleMultiPartForm(WebAppContext context, HttpRequest request,
-			HttpResponse response){
-		MultiPartForm multiPartForm=request.getMultiPartForm();
+			HttpResponse response) throws IOException{
+		HttpRequestBody multiPartForm=request.getRequestBody();
 		try {
-			while(multiPartForm.hasMorePart()){
+			while(multiPartForm.hasMorePart()==1){
 				String type =multiPartForm.getPartType();
-				if (type.equals(MultiPartForm.Part_Paramater)) {
+				if (type.equals(HttpRequestBody.Part_Paramater)) {
 				}else{
 					byte[] buff =new byte[512];
 					String name = multiPartForm.getFileName();
@@ -161,7 +161,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 		if (file.isDirectory()) {
 			String html=generateHtml(request.getRequestUri(),file);
 			response.setStatusCode(200);
-			response.setResponseHead(HttpResponse.Head_AcceptRanges_Response,
+			response.setResponseHead(HttpResponse.Accept_Ranges,
 					"bytes");
 			try {
 				response.setContentLength(html.getBytes("UTF-8").length);
@@ -172,7 +172,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 			response.write(html);
 		}else {
 			response.setStatusCode(200);
-			response.setResponseHead(HttpResponse.Head_AcceptRanges_Response,
+			response.setResponseHead(HttpResponse.Accept_Ranges,
 					"bytes");
 			response.setContentLength(file.length());
 

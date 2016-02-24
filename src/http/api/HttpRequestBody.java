@@ -5,7 +5,7 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import http.HttpProtocol;
+import http.base.HttpProtocol;
 import net.kernel.NetSession;
 
 /**
