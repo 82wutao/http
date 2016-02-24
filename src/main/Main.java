@@ -34,7 +34,7 @@ public class Main {
 		final XIOService<HttpProtocol> xioService=new XIOService<HttpProtocol>(serverContext);
 		
 		
-		XNetworkConfig<HttpProtocol> config=new XNetworkConfig<HttpProtocol>("",80,1000,true) {
+		XNetworkConfig<HttpProtocol> config=new XNetworkConfig<HttpProtocol>("",8080,1000,true) {
 			@Override
 			public NetSession<HttpProtocol> newNetworkSession(SocketChannel channel) {
 				return new NetSession<HttpProtocol>(xioService, this, channel, true, this.rcvBuffer, this.sendBuffer);

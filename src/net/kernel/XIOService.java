@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import common.Pair;
 
@@ -30,8 +29,9 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 	private List<XNetworkConfig<Request>> networkConfig = null;
 	private List<ServerSocketChannel> serverChannel = null;
 	private Map<ServerSocketChannel, XNetworkConfig<Request>> port_app=new HashMap<ServerSocketChannel, XNetworkConfig<Request>>();
+	
 	private Selector selector=null;
-	private AtomicInteger wakeupLock = new AtomicInteger(0);
+	private int wakeupLock = 0;
 	
 	private boolean running = false;
 //	private Pool<XBuffer> bufferPool= new Pool<XBuffer>(1024, 2048, new PoolableObjectFactory<XBuffer>() {
@@ -71,10 +71,12 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 			while (running) {
 				
 				int selected = 0;
-				if(wakeupLock.compareAndSet(0, 1)){
-					selector.select(1000);//TODO auto update this value
+				synchronized (selector) {
+					wakeupLock=1;
+					selected = selector.select(1000);
 				}
-				wakeupLock.set(0);
+				wakeupLock = 0;
+				
 				if (selected == 0) {
 					//TODO  auto update this value
 				}
@@ -108,9 +110,8 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 						int read = session.readBytesFromChanel();
 						
 						do{
-							
 							if(read ==-1){
-								client.close();
+								closeNetSession(session);
 								clientAttachment.t.ioListener.closedChannel(session);
 								break;
 							}
@@ -118,6 +119,7 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 								System.out.println("read is 0");
 								break;
 							}
+							//TODO async handler
 							while(session.readableBufferRemaining()>0){
 								System.out.println("reading");
 								Request request =clientAttachment.t.ioListener.readable(session);
@@ -142,7 +144,7 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 							clientAttachment.t.ioListener.writed(session);
 							
 							if(write ==-1){
-								client.close();
+								closeNetSession(session);
 								clientAttachment.t.ioListener.closedChannel(session);
 								break;
 							}
@@ -178,7 +180,7 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 		
 		NetSession<Request> session = config.newNetworkSession(socketChannel);
 		socketChannel.register(selector, SelectionKey.OP_CONNECT,new Pair<NetSession<Request>, XNetworkConfig<Request>>(session, config));
-		selector.wakeup();
+		wakeupSelector();
 	}
 	public void newServerAccepter(List<XNetworkConfig<Request>> configs) throws IOException{
 		networkConfig = configs;
@@ -195,7 +197,7 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 			
 			server.register(selector,SelectionKey.OP_ACCEPT);
 		}
-		selector.wakeup();
+		wakeupSelector();
 	}
 	public void start() throws IOException{
 		serverChannel = new ArrayList<ServerSocketChannel>();
@@ -209,8 +211,19 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 	public void changeInterestEvent(NetSession<Request> session, int event) throws ClosedChannelException {
 		session.getChannel().register(selector, event,
 				new Pair<NetSession<Request>, XNetworkConfig<Request>>(session, session.config));
-		if(wakeupLock.compareAndSet(1, 0)){
+		wakeupSelector();
+	}
+	protected void wakeupSelector() {
+		synchronized (selector) {
+			if (wakeupLock==0) {
+				return ;
+			}
 			selector.wakeup();
-		}
+		}		
+	}
+	protected void closeNetSession(NetSession<Request> session) throws IOException{
+		session.channel.register(selector, 0, null);
+		session.setConnectionStatus(NetSession.Status_Closed);
+		session.channel.close();
 	}
 }

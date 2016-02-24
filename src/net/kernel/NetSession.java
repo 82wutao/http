@@ -19,6 +19,8 @@ public class NetSession<Request> {
 	protected XNetworkConfig<Request> config=null;
 	protected ChannelInterestEvent<Request> channelInterestEvent;
 	
+	protected int connection_status=Status_Connecting;//TODO check it before readwrite
+	
 	public NetSession(ChannelInterestEvent<Request> channelInterestEvent,XNetworkConfig<Request> networkConfig,SocketChannel socketChannel
 			,boolean quick
 			,int readBufferSize,int sendBufferSize) {
@@ -38,7 +40,11 @@ public class NetSession<Request> {
 		return quick;
 	}
 	
-	
+	static final int Status_Connecting=1;
+	static final int Status_Closed=2;
+	void setConnectionStatus(int statusConst){
+		connection_status=statusConst;
+	}
 	public void write(XBuffer msg) throws ClosedChannelException{
 		byte[] bytes = msg.getData();
 		int off = msg.getPosition();
