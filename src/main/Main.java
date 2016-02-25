@@ -5,9 +5,8 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import http.HttpIOListener;
+import http.HttpListenerHandler;
 import http.HttpServerContext;
-import http.PostGameMsgHandler;
 import http.api.ServerContext;
 import http.base.HttpProtocol;
 import net.kernel.NetSession;
@@ -40,7 +39,8 @@ public class Main {
 				return new NetSession<HttpProtocol>(xioService, this, channel, true, this.rcvBuffer, this.sendBuffer);
 			}
 		};
-		config.setupApplication(new HttpIOListener(), new PostGameMsgHandler());
+		HttpListenerHandler app = new HttpListenerHandler();
+		config.setupApplication(app, app);
 		
 		List<XNetworkConfig<HttpProtocol>> configs = new ArrayList<XNetworkConfig<HttpProtocol>>();
 		configs.add(config);

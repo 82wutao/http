@@ -2,7 +2,6 @@ package http.api;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Map;
 
 public interface HttpResponse {
@@ -270,24 +269,20 @@ public interface HttpResponse {
 	public static final String X_Content_Duration = "X-Content-Duration";
 
 	public void setResponseHead(String key, String value);
-
 	public void setResponseHeads(Map<String, String> heads);
 
-	public void setHttpVersion(String version);
+	public void addCookie(Cookie cookie);
 
 	public void setStatusCode(int code);
+	public void setHttpVersion(String version);
 
 	public void setContentLength(long lenght);
 	public void setContentType(String type);
 	public void setCharset(String charset);
 
 	public void write(byte[] data, int off, int length);
-
 	public void write(String text);
-
 	public void write(File file);
 
 	public void flush()throws IOException;
-
-	public void addCookie(Cookie cookie);
 }

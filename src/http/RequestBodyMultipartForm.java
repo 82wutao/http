@@ -1,10 +1,11 @@
-package http.api;
+package http;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import http.api.RequestBody;
 import http.base.HttpProtocol;
 import net.kernel.NetSession;
 
@@ -13,10 +14,7 @@ import net.kernel.NetSession;
  * @author wutao
  *
  */
-public class HttpRequestBody {
-	public static final String Part_File = "File";
-	public static final String Part_Paramater = "Param";
-
+public class RequestBodyMultipartForm implements RequestBody {
 	private byte[] boundary = null;
 	
 	private String charset = null;
@@ -27,9 +25,9 @@ public class HttpRequestBody {
 	private String type = null;
 	private Map<String, String[]> parameters=new HashMap<String, String[]>();
 	private String fileName = null;
-	private boolean partEnd=false;
+	private boolean partEnd=true;
 
-	public HttpRequestBody(long bodyLength, byte[] boundary,
+	public RequestBodyMultipartForm(long bodyLength, byte[] boundary,
 			NetSession<HttpProtocol> netSession,String charset) {
 		this.boundary = boundary;
 		this.bodyLength = bodyLength;
@@ -37,11 +35,10 @@ public class HttpRequestBody {
 		this.charset = charset;
 	}
 
-	/**
-	 * 
-	 * @return -1 this part has more bytes,you should read it|0 no more part|1 has more part 
-	 * @throws IOException
+	/* (non-Javadoc)
+	 * @see http.api.RequestBody#hasMorePart()
 	 */
+	@Override
 	public int hasMorePart() throws IOException {
 		if (!partEnd) {
 			return -1;
@@ -50,24 +47,29 @@ public class HttpRequestBody {
 			return 0;
 		}
 		if (readed + boundary.length + 6 == bodyLength) {//--~--\r\n
-			skipBytes(boundary.length + 6);
+			session.skipBytes(boundary.length + 6);
+			readed = readed+boundary.length+6;
 			return 0;
 		}
 		
-		skipBytes(boundary.length + 4);//--boundary\r\n		
-
-		String desc = readline();// Content-Disposition: form-data; name="myfile"; filename="23277.html"
+		session.skipBytes(boundary.length + 4);//--boundary\r\n		
+		readed = readed+boundary.length+4;
+		
+		String desc = session.readLine(new byte[]{'\r','\n'});// Content-Disposition: form-data; name="myfile"; filename="23277.html"
+		readed = readed +desc.length();
 		desc = URLDecoder.decode(desc, charset);
 		
 		
 ///////////////////////////////////////////////////////////////////
 		int fileTag = desc.indexOf("filename");
 		if (fileTag == -1) {
-			this.type = HttpRequestBody.Part_Paramater;
+			this.type = RequestBody.Part_Paramater;
 			
-			skipBytes(2);//\r\n	
+			session.skipBytes(2);//\r\n	
+			readed = readed+2;
 			
-			String val = readline();//form field value
+			String val = session.readLine(new byte[]{'\r','\n'});//form field value
+			readed = readed +val.length();
 			val = URLDecoder.decode(val, charset);
 
 			String[] head_body = desc.split(":");
@@ -81,11 +83,12 @@ public class HttpRequestBody {
 			return 1;
 		}
 		
-		this.type = HttpRequestBody.Part_File;
+		this.type = RequestBody.Part_File;
 
-		String type = readline();//Content-Type: text/plain
-		
-		skipBytes(2);
+		String mimeType =session.readLine(new byte[]{'\r','\n'});//Content-Type: text/plain
+		readed = readed +mimeType.length();
+		session.skipBytes(2);//\r\n
+		readed = readed+2;
 
 		String[] head_body = desc.split(":");
 		String[] fields = head_body[1].split(";");
@@ -95,47 +98,19 @@ public class HttpRequestBody {
 		partEnd=false;
 		return 1;
 	}
-	private String readline() throws IOException{
-		StringBuilder builder = new StringBuilder();
-		while (true){
-			byte c = session.read();
-			if (c ==-1) {
-				session.readBytesFromChanel();				
-				continue;
-			}
-			readed ++;
-			if (c == '\r') {
-				continue;
-			}
-			if (c == '\n') {
-				break;
-			}
-			builder.append(c);
-		}
-		return builder.toString();
-	}
-	private void skipBytes(int skip) throws IOException{
-		int remaining = 0;
-		int skiped = 0;
-		do {
-			remaining = session.readableBufferRemaining();
-			if (remaining+skip >= skip){				
-				break;
-			}
-			session.skipRead(remaining);
-			skiped = skip + remaining;
-			
-			session.readBytesFromChanel();
-		}while(remaining+skiped < skip);
-		
-		session.skipRead(skip-skiped);
-		readed += skip;
-	}
 	
+	/* (non-Javadoc)
+	 * @see http.api.RequestBody#getPartType()
+	 */
+	@Override
 	public String getPartType() {
 		return type;
 	}
 
+	/* (non-Javadoc)
+	 * @see http.api.RequestBody#read(byte[])
+	 */
+	@Override
 	public int read(byte[] destBuffer) throws IOException {
 		if (partEnd) {
 			return -1;
@@ -161,10 +136,18 @@ public class HttpRequestBody {
 		return destLimit;
 	}
 
+	/* (non-Javadoc)
+	 * @see http.api.RequestBody#getParameter(java.lang.String)
+	 */
+	@Override
 	public String[] getParameter(String name) {
 		return parameters.get(name);
 	}
 
+	/* (non-Javadoc)
+	 * @see http.api.RequestBody#getFileName()
+	 */
+	@Override
 	public String getFileName() {
 		return fileName;
 	}
@@ -230,5 +213,9 @@ public class HttpRequestBody {
 			}
 		}
 		return 1;
+	}
+	@Override
+	public String getString() {
+		return null;
 	}
 }

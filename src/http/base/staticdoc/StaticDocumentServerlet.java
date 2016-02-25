@@ -15,7 +15,7 @@ import app.terminal.Cmd;
 import http.api.HttpRequest;
 import http.api.HttpResponse;
 import http.api.HttpServerlet;
-import http.api.HttpRequestBody;
+import http.api.RequestBody;
 import http.api.WebAppContext;
 
 public class StaticDocumentServerlet implements HttpServerlet {
@@ -72,7 +72,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 	@Override
 	public void doPOST(WebAppContext context, HttpRequest request,
 			HttpResponse response)throws Exception {
-		HttpRequestBody form=request.getRequestBody();
+		RequestBody form=request.getRequestBody();
 		if (form!=null) {
 			handleMultiPartForm(context,request,response);
 		}
@@ -113,11 +113,11 @@ public class StaticDocumentServerlet implements HttpServerlet {
 	}
 	private void handleMultiPartForm(WebAppContext context, HttpRequest request,
 			HttpResponse response) throws IOException{
-		HttpRequestBody multiPartForm=request.getRequestBody();
+		RequestBody multiPartForm=request.getRequestBody();
 		try {
 			while(multiPartForm.hasMorePart()==1){
 				String type =multiPartForm.getPartType();
-				if (type.equals(HttpRequestBody.Part_Paramater)) {
+				if (type.equals(RequestBody.Part_Paramater)) {
 				}else{
 					byte[] buff =new byte[512];
 					String name = multiPartForm.getFileName();

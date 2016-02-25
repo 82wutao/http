@@ -223,7 +223,6 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 	}
 	protected void closeNetSession(NetSession<Request> session) throws IOException{
 		session.channel.register(selector, 0, null);
-		session.setConnectionStatus(NetSession.Status_Closed);
-		session.channel.close();
+		session.close();
 	}
 }

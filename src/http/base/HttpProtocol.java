@@ -1,12 +1,18 @@
 package http.base;
 
+import http.RequestBodyFormUrlencoded;
+import http.RequestBodyJson;
+import http.RequestBodyMultipartForm;
+import http.RequestBodyOctetStream;
+import http.RequestBodyText;
 import http.api.HttpRequest;
-import http.api.HttpRequestBody;
+import http.api.RequestBody;
+import http.protocol.ContentType;
 import http.protocol.HttpHeaders;
 import http.protocol.HttpMethods;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +48,7 @@ public class HttpProtocol  implements HttpRequest {
 	private String version;
 	
 	private Map<String, String> headers =new HashMap<String, String>();
-	private HttpRequestBody body =null;
+	private RequestBody body =null;
 
 	public HttpProtocol(Charset charset,NetSession<HttpProtocol> netSession) {
 		this.charset = charset;
@@ -302,13 +308,9 @@ public class HttpProtocol  implements HttpRequest {
 	protected void base64Decode() throws IOException{
 		int decode =this.uri.indexOf('%');
 		if (decode != -1) {
-			sun.misc.BASE64Decoder decoder =new sun.misc.BASE64Decoder();
-			byte[] bytes =decoder.decodeBuffer(this.uri);
-			uri=new String(bytes,charset);
+			uri=URLDecoder.decode(uri, charset.displayName());
 		}
 	    
-		
-		
 		for(Entry<String, String[]> entry:this.paramaters.entrySet()){
 			String key =entry.getKey();
 			String[] array=entry.getValue();
@@ -320,9 +322,7 @@ public class HttpProtocol  implements HttpRequest {
 				if (decode ==-1) {
 					continue;
 				}
-				sun.misc.BASE64Decoder decoder =new sun.misc.BASE64Decoder();
-				byte[] bytes =decoder.decodeBuffer(value);
-				array[i]=new String(bytes,charset);
+				array[i]=URLDecoder.decode(value, charset.displayName());
 			}
 		}
 		
@@ -395,7 +395,7 @@ public class HttpProtocol  implements HttpRequest {
 
 
 	@Override
-	public HttpRequestBody getRequestBody() throws IOException {
+	public RequestBody getRequestBody() throws IOException {
 		if (body != null) {
 			return body;
 		}
@@ -413,42 +413,23 @@ public class HttpProtocol  implements HttpRequest {
 			String contentTypeHeader = headers.get(Content_Type);
 			String contentLengthHeader=headers.get(Content_Length);
 			
-			if (contentTypeHeader.startsWith("application/x-www-form-urlencoded")) {
-				int length = Integer.parseInt(contentLengthHeader);
-				
-				for(int sum =0, handled=0;sum < length;sum = sum +handled){
-					handled =0;
-
-					for (int c = session.read(); c!=-1 ; handled++) {
-						if (c =='=') {
-							temp_name = stringBuilder.toString();
-							stringBuilder.setLength(0);
-							continue;
-						}
-						else if (c =='&') {
-							String value = stringBuilder.toString();
-							paramaters.put(temp_name, new String[]{value});
-							stringBuilder.setLength(0);
-							continue;
-						}
-						stringBuilder.append((char)c);
-					}
-					if (sum + handled == length) {
-						String value = stringBuilder.toString();
-						paramaters.put(temp_name, new String[]{value});
-						stringBuilder.setLength(0);
-					}else {
-						session.readBytesFromChanel();
-					}
-					
-				}
-			}else if (contentTypeHeader.trim().startsWith("multipart/form-data") ){
+			if (contentTypeHeader.startsWith(ContentType.Application_X_WWWFormUrlencoded)) {
+				this.body=new RequestBodyFormUrlencoded(session,charset.displayName());
+			}else if (contentTypeHeader.trim().startsWith(ContentType.Multipart_Formdata) ){
 				String[] type_split= contentTypeHeader.trim().split(";");
 				String boundary=type_split[1].trim().split("=")[1];
 				byte[] boundaryBytes=boundary.getBytes(charset);
-				this.body=new HttpRequestBody(Long.parseLong(contentLengthHeader.trim()),boundaryBytes, session,charset.displayName());
+				this.body=new RequestBodyMultipartForm(Long.parseLong(contentLengthHeader.trim()),boundaryBytes, session,charset.displayName());
 			}
-			
+			else if (contentTypeHeader.trim().startsWith(ContentType.Application_Json) ){
+				this.body=new RequestBodyJson(session,charset.displayName());
+			}
+			else if (contentTypeHeader.trim().startsWith(ContentType.Text_Xml) ){
+				this.body=new RequestBodyText(session,charset.displayName());
+			}
+			else if (contentTypeHeader.trim().startsWith(ContentType.Application_OctetStream) ){
+				this.body=new RequestBodyOctetStream(session);
+			}
 		}
 	}
 
@@ -463,11 +444,17 @@ public class HttpProtocol  implements HttpRequest {
 			}
 			try {
 				parseBody();
+				if (body.hasMorePart()!=0) {
+					return this.body.getParameter(paramer)[0]; 
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			return null;
 		}
-		return this.paramaters.get(paramer)[0]; 
+		else{
+			return value[0];
+		}
 	}
 
 	

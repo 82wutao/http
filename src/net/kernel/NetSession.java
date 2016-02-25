@@ -2,7 +2,6 @@ package net.kernel;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
@@ -11,6 +10,9 @@ import java.util.Queue;
 import common.io.XBuffer;
 
 public class NetSession<Request> {
+	static final int Status_Connecting=1;
+	static final int Status_Closed=2;
+
 	protected boolean quick;
 	protected SocketChannel channel;
 	protected ByteBuffer readableBuffer;
@@ -19,7 +21,7 @@ public class NetSession<Request> {
 	protected XNetworkConfig<Request> config=null;
 	protected ChannelInterestEvent<Request> channelInterestEvent;
 	
-	protected int connection_status=Status_Connecting;//TODO check it before readwrite
+	protected int connection_status=Status_Connecting;
 	
 	public NetSession(ChannelInterestEvent<Request> channelInterestEvent,XNetworkConfig<Request> networkConfig,SocketChannel socketChannel
 			,boolean quick
@@ -40,12 +42,11 @@ public class NetSession<Request> {
 		return quick;
 	}
 	
-	static final int Status_Connecting=1;
-	static final int Status_Closed=2;
-	void setConnectionStatus(int statusConst){
-		connection_status=statusConst;
-	}
-	public void write(XBuffer msg) throws ClosedChannelException{
+	public void write(XBuffer msg) throws IOException{
+		if (connection_status == Status_Closed) {
+			throw new IOException("connect is closed");
+		}
+		
 		byte[] bytes = msg.getData();
 		int off = msg.getPosition();
 		int length = msg.getLimit() - off;
@@ -62,7 +63,10 @@ public class NetSession<Request> {
 			flush();
 		}		
 	}
-	public void write(String msg,Charset charset) throws ClosedChannelException{
+	public void write(String msg,Charset charset) throws IOException{
+		if (connection_status == Status_Closed) {
+			throw new IOException("connect is closed");
+		}
 		byte[] bytes = msg.getBytes(charset);
 		
 		ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
@@ -76,8 +80,10 @@ public class NetSession<Request> {
 			flush();
 		}		
 	}
-	public void write(byte[] data,int offset,int length) throws ClosedChannelException{
-		
+	public void write(byte[] data,int offset,int length) throws IOException{
+		if (connection_status == Status_Closed) {
+			throw new IOException("connect is closed");
+		}
 		ByteBuffer buffer = ByteBuffer.allocate(length);
 		buffer.put(data,0,length);
 		buffer.flip();
@@ -89,8 +95,10 @@ public class NetSession<Request> {
 			flush();
 		}
 	}
-	public void write(byte v) throws ClosedChannelException{
-		
+	public void write(byte v) throws IOException{
+		if (connection_status == Status_Closed) {
+			throw new IOException("connect is closed");
+		}
 		ByteBuffer buffer = ByteBuffer.allocate(1);
 		buffer.put(v);
 		buffer.flip();
@@ -103,6 +111,9 @@ public class NetSession<Request> {
 		}
 	}
 	int writeBytesToChanel() throws IOException{
+		if (connection_status == Status_Closed) {
+			throw new IOException("connect is closed");
+		}
 		ByteBuffer img= null;
 		synchronized (sendQueue) {
 			if (sendQueue.isEmpty()) {
@@ -130,7 +141,10 @@ public class NetSession<Request> {
 //		sendableBuffer.compact();
 //		return write;
 	}
-	public void flush() throws ClosedChannelException{
+	public void flush() throws IOException{
+		if (connection_status == Status_Closed) {
+			throw new IOException("connect is closed");
+		}
 		channelInterestEvent.changeInterestEvent(this, 
 				ChannelInterestEvent.Read|ChannelInterestEvent.Write);
 	}
@@ -139,21 +153,75 @@ public class NetSession<Request> {
 		return readableBuffer.remaining();
 	}
 	public int readBytesFromChanel() throws IOException{
+		if (connection_status == Status_Closed) {
+			throw new IOException("connect is closed");
+		}
 //		readableBuffer.rewind();//position comebing 0;for read again
-		if (readableBuffer.position() ==0
-				&&readableBuffer.limit()==readableBuffer.capacity()) {
-			
-		}else {			
+		if (readableBuffer.remaining() != readableBuffer.capacity()) {			
 			readableBuffer.compact();//take bytes unreaded to the begin,position is after bytes ,limit is capacity ,for write 2 self 
 		}
 		int readed = channel.read(readableBuffer);
 		readableBuffer.flip();//for read from self
 		return readed;
 	}
-	public void skipRead(int skip){
+	
+	public String readLine(byte[] end) throws IOException{
+		StringBuilder builder = new StringBuilder();
+		int compareIndex =0;
+		while (true){
+			byte c = read();
+			if (c==-1) {
+				if (builder.length()==0) {
+					return null;
+				}
+				return builder.toString();
+			}
+			
+			if (end[compareIndex] == c) {
+				compareIndex++;
+				if (compareIndex==end.length) {
+					break;
+				}
+			}else {
+				compareIndex=0;
+				if (end[compareIndex] == c) {
+					compareIndex++;
+				}
+			}
+			builder.append(c);
+		}
+		return builder.toString();
+	}
+	private void skipRead(int skip){
 		int position = readableBuffer.position();
 		readableBuffer.position(position + skip);
 	}
+	public void skipBytes(int skip) throws IOException{
+		int remaining = readableBufferRemaining();
+		int skiped = 0;
+		while (remaining + skiped < skip ) {
+			skipRead(remaining);
+			skiped = skiped + remaining;
+			
+			readBytesFromChanel();
+			remaining = readableBufferRemaining();
+		}
+		skipRead(skip-skiped);
+		
+//		do {
+//			remaining = readableBufferRemaining();
+//			if (remaining+skiped >= skip){				
+//				break;
+//			}
+//			skipRead(remaining);
+//			skiped = skiped + remaining;
+//			
+//			readBytesFromChanel();
+//		}while(true);
+//		
+//		skipRead(skip-skiped);
+	}
+	
 	public void backRead(int back){
 		int position = readableBuffer.position();
 		readableBuffer.position(position - back);
@@ -210,6 +278,7 @@ public class NetSession<Request> {
 	}
 	////////////////////////////////////////////////////////////////////////////////
 	public void close() throws IOException{
+		connection_status = Status_Closed;
 		channel.close();
 	}
 }
