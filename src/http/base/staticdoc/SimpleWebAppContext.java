@@ -5,6 +5,7 @@ import http.api.HttpResponse;
 import http.api.HttpServerlet;
 import http.api.ServerContext;
 import http.api.WebAppContext;
+import http.protocol.ContentType;
 
 import java.io.File;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 
 public class SimpleWebAppContext implements WebAppContext {
+	
 	ServerContext serverContext;
 	String contextPath;
 	String filePath;
@@ -71,16 +73,25 @@ public class SimpleWebAppContext implements WebAppContext {
 		}
 
 	}
-
-	public String mimeType(String resourceType) {
-		String mime = mimeMap.get(resourceType);
-		if (mime==null) {
-			mime=serverContext.getMimeType(resourceType);
-		}
-		return mime == null ? "application/octet-stream" : mime;
-	}
+	
 	@Override
 	public String getContextAttribute(String param) {
 		return serverContext.getContextAttribute(param);
 	}
+
+	@Override
+	public void destory() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getMimeType(String resourceType) {
+		String mime = mimeMap.get(resourceType);
+		if (mime==null) {
+			mime=serverContext.getMimeType(resourceType);
+		}
+		return mime == null ? ContentType.Application_OctetStream : mime;
+	}
+	
 }

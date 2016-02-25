@@ -178,7 +178,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 
 			String[] name_fix = diskFile.split("\\.");
 			int subfix=name_fix.length-1;
-			String typeString = context.mimeType(name_fix[subfix].trim());
+			String typeString = context.getMimeType(name_fix[subfix].trim());
 			response.setContentType(typeString);
 			response.write(file);
 		}
