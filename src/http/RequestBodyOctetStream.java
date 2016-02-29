@@ -53,12 +53,12 @@ public class RequestBodyOctetStream implements RequestBody {
 	 * @see http.api.RequestBody#read(byte[])
 	 */
 	@Override
-	public int read(byte[] destBuffer) throws IOException {
+	public int read(byte[] destBuffer,int offset,int length) throws IOException {
 		if (partEnd) {
 			return -1;
 		}
 		
-		int destLimit=session.read(destBuffer, 0);
+		int destLimit=session.read(destBuffer, offset,length);
 		if (destLimit == -1) {
 			partEnd=true;
 			return -1;

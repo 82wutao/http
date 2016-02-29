@@ -250,7 +250,7 @@ public class NetSession<Request> {
 		}	
 	}
 
-	public int read(byte[] dest,int offset) throws IOException{
+	public int read(byte[] dest,int offset,int length) throws IOException{
 		if (!readableBuffer.hasRemaining()) {
 			int readed = readBytesFromChanel();
 			if (readed == -1) {
@@ -259,7 +259,6 @@ public class NetSession<Request> {
 		}
 		
 		int remaining = readableBuffer.remaining();
-		int length = dest.length - offset;
 		if (remaining < length) {
 			readableBuffer.get(dest,offset,remaining);
 			return remaining;
