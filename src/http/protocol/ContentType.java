@@ -39,12 +39,12 @@ public class ContentType {
 	public static final String Application_X_dvi="application/x-dvi";
 	public static final String Application_X_hdf="application/x-hdf";
 	public static final String Application_X_latex="application/x-latex";
-	public static final String application_Zip="application/zip";
+	public static final String Application_Zip="application/zip";
 	public static final String Application_OctetStream="application/octet-stream";
 	public static final String Application_Oda="application/oda";
 	public static final String Application_Pdf="application/pdf";
 	public static final String Application_Postscript="application/postscript";
-	public static final String application_Rtf="application/rtf";
+	public static final String Application_Rtf="application/rtf";
 	public static final String Application_X_netcdf="application/x-netcdf";
 	public static final String Application_X_X509CaCert="application/x-x509-ca-cert";
 	public static final String Application_X_gzip="application/x-gzip";

@@ -61,7 +61,7 @@ public class RequestBodyText implements RequestBody {
 	 * @see http.api.RequestBody#read(byte[])
 	 */
 	@Override
-	public int read(byte[] destBuffer) throws IOException {
+	public int read(byte[] destBuffer,int offset,int length) throws IOException {
 		return -1;
 	}
 

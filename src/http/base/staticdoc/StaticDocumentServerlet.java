@@ -126,10 +126,10 @@ public class StaticDocumentServerlet implements HttpServerlet {
 					OutputStream outputStream = new FileOutputStream(file);
 					
 					try {
-						int readed = multiPartForm.read(buff);
+						int readed = multiPartForm.read(buff,0,buff.length);
 						while(readed!=-1){
 							outputStream.write(buff, 0, readed);
-							readed = multiPartForm.read(buff);
+							readed = multiPartForm.read(buff,0,buff.length);
 						}
 					} catch (Exception e) {
 						throw e;

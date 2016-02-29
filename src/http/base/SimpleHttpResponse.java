@@ -85,7 +85,7 @@ public class SimpleHttpResponse implements HttpResponse {
 		
 		String[] name_fix = document.getName().split("\\.");
 		if (name_fix.length==1) {
-			this.setContentType("application/octet-stream");
+			this.setContentType(ContentType.Application_OctetStream);
 			return;
 		}
 
@@ -110,7 +110,7 @@ public class SimpleHttpResponse implements HttpResponse {
 		String contentType = headMap
 				.get(HttpResponse.Content_Type);
 		if (contentType == null) {
-			headMap.put(HttpResponse.Content_Type, "text/plain");
+			headMap.put(HttpResponse.Content_Type, ContentType.Text_Html);
 		}
 		headMap.put(Content_Length, ""+bodySize);
 		
@@ -127,8 +127,6 @@ public class SimpleHttpResponse implements HttpResponse {
 		Set<Entry<String, String>> headers = headMap.entrySet();
 		for (Entry<String, String> entry : headers) {
 			String headLine = entry.getKey()+": "+entry.getValue()+"\r\n";
-//			byte[] key = entry.getKey().getBytes(Charset.forName(charset));
-//			byte[] value = entry.getValue().getBytes(Charset.forName(charset));
 			
 			byte[] header = headLine.getBytes(Charset.forName(charset));
 			session.write(header,0,header.length);
@@ -136,7 +134,7 @@ public class SimpleHttpResponse implements HttpResponse {
 		session.write(line,0,line.length);
 
 		buffer.readyReadingFromBuffer();
-		if (buffer.remain()>1) {
+		if (buffer.remain()>0) {
 			session.write(buffer.getData(),buffer.getPosition(),buffer.getLimit() - buffer.getPosition());
 		}
 		

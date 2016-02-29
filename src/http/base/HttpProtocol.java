@@ -312,7 +312,6 @@ public class HttpProtocol  implements HttpRequest {
 		}
 	    
 		for(Entry<String, String[]> entry:this.paramaters.entrySet()){
-			String key =entry.getKey();
 			String[] array=entry.getValue();
 			
 			for (int i = 0; i < array.length; i++) {

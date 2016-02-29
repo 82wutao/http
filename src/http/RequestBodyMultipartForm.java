@@ -111,29 +111,29 @@ public class RequestBodyMultipartForm implements RequestBody {
 	 * @see http.api.RequestBody#read(byte[])
 	 */
 	@Override
-	public int read(byte[] destBuffer) throws IOException {
+	public int read(byte[] destBuffer,int offset,int length) throws IOException {
 		if (partEnd) {
 			return -1;
 		}
 		
-		int destLimit=session.read(destBuffer, 0);
-		for (int i = 0; i < destLimit; i++) {
-			int ret =isBoundary(destBuffer,i,destLimit);
+		int readed=session.read(destBuffer, offset,length);
+		for (int i = offset; i < readed; i++) {
+			int ret =isBoundary(destBuffer,i,readed);
 			if (ret == 0) {
-				destLimit = i;
-				session.backRead(destLimit - i);
+				readed = i;
+				session.backRead(readed - i);
 				break;
 			}
 			if (ret == 1) {
 				partEnd =true;
 				readed += 2;//\r\n(--boundary\r\n|--)
-				destLimit = i;
-				session.backRead(destLimit - i+2);
+				readed = i;
+				session.backRead(readed - i+2);
 				break;
 			}
 			readed++;
 		}
-		return destLimit;
+		return readed;
 	}
 
 	/* (non-Javadoc)

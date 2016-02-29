@@ -16,32 +16,10 @@ public interface RequestBody {
 		 * @throws IOException
 		 */
 	int hasMorePart() throws IOException;
-	//	private String readline() throws IOException{
-	//		StringBuilder builder = new StringBuilder();
-	//		while (true){
-	//			byte c = session.read();
-	//			if (c ==-1) {
-	//				session.readBytesFromChanel();				
-	//				continue;
-	//			}
-	//			readed ++;
-	//			if (c == '\r') {
-	//				continue;
-	//			}
-	//			if (c == '\n') {
-	//				break;
-	//			}
-	//			builder.append(c);
-	//		}
-	//		return builder.toString();
-	//	}
-
 	String getPartType();
 
-	int read(byte[] destBuffer) throws IOException;
-
+	int read(byte[] destBuffer,int off,int length) throws IOException;
 	String[] getParameter(String name);
-
 	String getFileName();
 	String getString();
 }

@@ -5,7 +5,7 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import http.HttpListenerHandler;
+import app.game.GameListenerHandler;
 import http.HttpServerContext;
 import http.api.ServerContext;
 import http.base.HttpProtocol;
@@ -33,13 +33,13 @@ public class Main {
 		final XIOService<HttpProtocol> xioService=new XIOService<HttpProtocol>(serverContext);
 		
 		
-		XNetworkConfig<HttpProtocol> config=new XNetworkConfig<HttpProtocol>("",8080,1000,true) {
+		XNetworkConfig<HttpProtocol> config=new XNetworkConfig<HttpProtocol>("",80,1000,true) {
 			@Override
 			public NetSession<HttpProtocol> newNetworkSession(SocketChannel channel) {
 				return new NetSession<HttpProtocol>(xioService, this, channel, true, this.rcvBuffer, this.sendBuffer);
 			}
 		};
-		HttpListenerHandler app = new HttpListenerHandler();
+		GameListenerHandler app = new GameListenerHandler();
 		config.setupApplication(app, app);
 		
 		List<XNetworkConfig<HttpProtocol>> configs = new ArrayList<XNetworkConfig<HttpProtocol>>();
