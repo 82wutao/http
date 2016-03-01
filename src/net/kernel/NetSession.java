@@ -16,6 +16,7 @@ public class NetSession<Request> {
 	protected boolean quick;
 	protected SocketChannel channel;
 	protected ByteBuffer readableBuffer;
+	protected ByteBuffer sendableBuffer;
 	protected Queue<ByteBuffer> sendQueue = null;
 	
 	protected XNetworkConfig<Request> config=null;
@@ -32,6 +33,7 @@ public class NetSession<Request> {
 		channel = socketChannel;
 		this.quick = quick;
 		readableBuffer =  ByteBuffer.allocate(readBufferSize);
+		sendableBuffer = ByteBuffer.allocate(sendBufferSize);
 		sendQueue=new ArrayDeque<ByteBuffer>();
 	}
 	
@@ -50,64 +52,68 @@ public class NetSession<Request> {
 		byte[] bytes = msg.getData();
 		int off = msg.getPosition();
 		int length = msg.getLimit() - off;
-		
-		ByteBuffer buffer = ByteBuffer.allocate(length);
-		buffer.put(bytes,off,length);
-		buffer.flip();
+		write(bytes, off, length);
 		msg.setPosition(off+length);
-		
-		synchronized (sendQueue) {
-			sendQueue.add(buffer);
-		}
-		if (quick) {
-			flush();
-		}		
 	}
 	public void write(String msg,Charset charset) throws IOException{
 		if (connection_status == Status_Closed) {
 			throw new IOException("connect is closed");
 		}
 		byte[] bytes = msg.getBytes(charset);
-		
-		ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-		buffer.put(bytes,0,bytes.length);
-		buffer.flip();
-		
-		synchronized (sendQueue) {
-			sendQueue.add(buffer);
-		}
-		if (quick) {
-			flush();
-		}		
+		write(bytes,0,bytes.length);
 	}
 	public void write(byte[] data,int offset,int length) throws IOException{
 		if (connection_status == Status_Closed) {
 			throw new IOException("connect is closed");
 		}
-		ByteBuffer buffer = ByteBuffer.allocate(length);
-		buffer.put(data,0,length);
-		buffer.flip();
 		
-		synchronized (sendQueue) {
-			sendQueue.add(buffer);
-		}
 		if (quick) {
-			flush();
+			ByteBuffer buffer = ByteBuffer.allocate(length);
+			buffer.put(data,offset,length);
+			buffer.flip();
+			
+			synchronized (sendQueue) {
+				sendQueue.add(buffer);
+			}
+			
+			channelInterestEvent.changeInterestEvent(this, 
+					ChannelInterestEvent.Read|ChannelInterestEvent.Write);
+		}else {
+			if (sendableBuffer.remaining()<length) {
+				synchronized (sendQueue) {
+					sendableBuffer.flip();
+					sendQueue.add(sendableBuffer);
+				}
+				
+				readableBuffer =  ByteBuffer.allocate(config.sendBuffer);
+			}
+			sendableBuffer.put(data,offset,length);
 		}
 	}
 	public void write(byte v) throws IOException{
 		if (connection_status == Status_Closed) {
 			throw new IOException("connect is closed");
 		}
-		ByteBuffer buffer = ByteBuffer.allocate(1);
-		buffer.put(v);
-		buffer.flip();
 		
-		synchronized (sendQueue) {
-			sendQueue.add(buffer);
-		}
 		if (quick) {
-			flush();
+			ByteBuffer buffer = ByteBuffer.allocate(1);
+			buffer.put(v);
+			buffer.flip();
+			synchronized (sendQueue) {
+				sendQueue.add(buffer);
+			}
+			channelInterestEvent.changeInterestEvent(this, 
+					ChannelInterestEvent.Read|ChannelInterestEvent.Write);
+		}else {
+			if (sendableBuffer.remaining()<1) {
+				synchronized (sendQueue) {
+					sendableBuffer.flip();
+					sendQueue.add(sendableBuffer);
+				}
+				
+				readableBuffer =  ByteBuffer.allocate(config.sendBuffer);
+			}
+			sendableBuffer.put(v);
 		}
 	}
 	int writeBytesToChanel() throws IOException{
@@ -133,18 +139,18 @@ public class NetSession<Request> {
 			}
 		}
 		return write;
-//		sendableBuffer.flip();//for read from self
-//		if (!sendableBuffer.hasRemaining()){
-//			return 0;
-//		}
-//		int write =channel.write(sendableBuffer);
-//		sendableBuffer.compact();
-//		return write;
 	}
 	public void flush() throws IOException{
 		if (connection_status == Status_Closed) {
 			throw new IOException("connect is closed");
 		}
+		
+		synchronized (sendQueue) {
+			sendableBuffer.flip();
+			sendQueue.add(sendableBuffer);
+		}
+		readableBuffer =  ByteBuffer.allocate(config.sendBuffer);
+		
 		channelInterestEvent.changeInterestEvent(this, 
 				ChannelInterestEvent.Read|ChannelInterestEvent.Write);
 	}
@@ -208,18 +214,6 @@ public class NetSession<Request> {
 		}
 		skipRead(skip-skiped);
 		
-//		do {
-//			remaining = readableBufferRemaining();
-//			if (remaining+skiped >= skip){				
-//				break;
-//			}
-//			skipRead(remaining);
-//			skiped = skiped + remaining;
-//			
-//			readBytesFromChanel();
-//		}while(true);
-//		
-//		skipRead(skip-skiped);
 	}
 	
 	public void backRead(int back){
