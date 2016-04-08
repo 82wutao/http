@@ -63,7 +63,6 @@ public class HttpProtocol  implements HttpRequest {
 	public boolean parseProtocol() throws Exception{
 		
 		while(currentState <= Parse_State_AfterHead){
-			System.out.println("parse protocol state is "+currentState);
 			switch (currentState) {
 			case Parse_State_Begin:
 			case Parse_State_Verb:
@@ -389,7 +388,7 @@ public class HttpProtocol  implements HttpRequest {
 		String value =headers.get(HttpRequest.Cookie);
 		String[] cookie = value.split("; ");
 		return null;
-		//TODO 
+		//TODO implements cookie
 	}
 
 

@@ -116,14 +116,11 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 								break;
 							}
 							if (read==0) {
-								System.out.println("read is 0");
 								break;
 							}
 							//TODO async handler
 							while(session.readableBufferRemaining()>0){
-								System.out.println("reading");
 								Request request =clientAttachment.t.ioListener.readable(session);
-								System.out.println("end reading");
 								if (request !=null) {
 									//TODO async handler
 									clientAttachment.t.appHandler.handle(session, request);

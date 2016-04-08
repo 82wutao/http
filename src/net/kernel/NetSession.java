@@ -263,7 +263,8 @@ public class NetSession<Request> {
 	public byte read() throws IOException{
 		if (!readableBuffer.hasRemaining()) {
 			int readed = readBytesFromChanel();
-			if (readed == -1) {
+			if (readed == -1
+					||readed==0) {
 				return -1;
 			}
 		}
