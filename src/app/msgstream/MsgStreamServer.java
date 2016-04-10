@@ -5,14 +5,11 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import app.msgstream.chains.NodeChain;
 import common.log.AppLogger;
 import common.log.AppLogger.LogLvl;
-import http.api.HttpRequest;
-import http.api.HttpResponse;
 import http.api.RequestBody;
 import http.base.HttpProtocol;
-import http.base.SimpleHttpResponse;
-import http.protocol.ContentType;
 import net.Handler;
 import net.IOListener;
 import net.kernel.NetSession;
@@ -20,6 +17,9 @@ import net.kernel.NetSession;
 public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpProtocol>{
 	
 	private Map<NetSession<HttpProtocol>, HttpProtocol> session_request=new HashMap<NetSession<HttpProtocol>, HttpProtocol>();
+	private NodeChain chain=null;
+	
+	public void setCalcChain(NodeChain calcChain){chain = calcChain;}
 	
 	@Override
 	public void closedChannel(NetSession<HttpProtocol> session) {
@@ -27,17 +27,13 @@ public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpPro
 	}
 
 	@Override
-	public void connectedChannel(NetSession<HttpProtocol> session) {
-		// nothing
-	}
+	public void connectedChannel(NetSession<HttpProtocol> session) {}
 
 	@Override
 	public void opennedChannel(NetSession<HttpProtocol> session) {
 		HttpProtocol request =new HttpProtocol(Charset.forName("UTF-8"), session);
 		session_request.put(session,request);
 	}
-
-	
 	@Override
 	public HttpProtocol readable(NetSession<HttpProtocol> session) {
 		HttpProtocol request =session_request.get(session);
@@ -58,13 +54,10 @@ public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpPro
 	}
 
 	@Override
-	public void writed(NetSession<HttpProtocol> session) {
-
-	}
+	public void writed(NetSession<HttpProtocol> session) {}
 
 	@Override
 	public void handle(NetSession<HttpProtocol> session, HttpProtocol request) {
-		
 		RequestBody body = null;
 		try {
 			body=request.getRequestBody();
@@ -107,36 +100,26 @@ public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpPro
 			}
 			return;
 		}
-		
-		
-
-		System.out.println("json "+json);
-	
-		SimpleHttpResponse resp=new SimpleHttpResponse(session);
-		resp.setCharset("UTF-8");
-		resp.setHttpVersion("HTTP/1.1");
-		resp.setStatusCode(200);
-		resp.setContentType(ContentType.Application_Json);
-		
-		resp.setResponseHead(HttpRequest.Content_Type, ContentType.Application_Json);
-		resp.write(json);
-		
-		
-
-		try {
-			resp.flush();
-		} catch (IOException e) {
-			AppLogger logger =AppLogger.getLogger("debug");
-			logger.log(LogLvl.Debug, "測試response輸出出錯");
-		}
-
+		Message data = new xx(json);
+		data.fields=data.convertRaw2Fields(json);
+		chain.calc(data);
+//		System.out.println("json "+json);
+//	
+//		SimpleHttpResponse resp=new SimpleHttpResponse(session);
+//		resp.setCharset("UTF-8");
+//		resp.setHttpVersion("HTTP/1.1");
+//		resp.setStatusCode(200);
+//		resp.setContentType(ContentType.Application_Json);
+//		
+//		resp.setResponseHead(HttpRequest.Content_Type, ContentType.Application_Json);
+//		resp.write(json);
+//
+//		try {
+//			resp.flush();
+//		} catch (IOException e) {
+//			AppLogger logger =AppLogger.getLogger("debug");
+//			logger.log(LogLvl.Debug, "測試response輸出出錯");
+//		}
 	}
 	
-	
-
-	
-	private void sendError(String tips,HttpResponse resp) throws IOException{
-		AppLogger logger =AppLogger.getLogger("debug");
-		logger.log(LogLvl.Debug, tips);
-	}
 }
