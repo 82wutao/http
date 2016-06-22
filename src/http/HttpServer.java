@@ -1,26 +1,24 @@
-package app.msgstream;
+package http;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import common.log.AppLogger;
-import http.HttpProtocol;
-import http.WebAppContext;
-import net.ServerContext;
 import net.kernel.NetSession;
 import net.kernel.XIOService;
 import net.kernel.XNetworkConfig;
 
-public class Runner {
-	public static void main(String[] args) throws IOException {
-		AppLogger.initailLogs("debug", AppLogger.LogLvl.Debug,System.out);
-		ServerContext serverContext = new WebAppContext();
+public class HttpServer {
+	
+	private XIOService<HttpProtocol> xioService =null;
+	
+	public void start() throws IOException{
+		WebAppContext serverContext = new WebAppContext();
+		serverContext.initial(new File("config.txt"));
 		
-		
-		final XIOService<HttpProtocol> xioService=new XIOService<HttpProtocol>(serverContext);
-		
+		xioService=new XIOService<HttpProtocol>(serverContext);
 		
 		XNetworkConfig<HttpProtocol> config=new XNetworkConfig<HttpProtocol>("",80,1000,true) {
 			@Override
@@ -28,7 +26,7 @@ public class Runner {
 				return new NetSession<HttpProtocol>(xioService, this, channel, true, this.rcvBuffer, this.sendBuffer);
 			}
 		};
-		MsgStreamServer app = new MsgStreamServer();
+		HttpListenerHandler app = new HttpListenerHandler(serverContext);
 		config.setupApplication(app, app);
 		
 		List<XNetworkConfig<HttpProtocol>> configs = new ArrayList<XNetworkConfig<HttpProtocol>>();
@@ -36,5 +34,10 @@ public class Runner {
 		
 		xioService.start();
 		xioService.newServerAccepter(configs);
+		
+		
+	}
+	public void stop() throws IOException{
+		xioService.stopListen();
 	}
 }

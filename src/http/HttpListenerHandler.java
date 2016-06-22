@@ -13,10 +13,14 @@ import net.IOListener;
 import net.kernel.NetSession;
 
 public class HttpListenerHandler implements IOListener<HttpProtocol>,Handler<HttpProtocol> {
-	public HttpListenerHandler() {
+	
+	private WebAppContext context = null;
+	private Map<NetSession<HttpProtocol>, HttpProtocol> session_request=new HashMap<NetSession<HttpProtocol>, HttpProtocol>();
+	
+	public HttpListenerHandler( WebAppContext context ) {
+		this.context = context;
 	}
 
-	private Map<NetSession<HttpProtocol>, HttpProtocol> session_request=new HashMap<NetSession<HttpProtocol>, HttpProtocol>();
 	
 	@Override
 	public void closedChannel(NetSession<HttpProtocol> session) {
@@ -60,38 +64,54 @@ public class HttpListenerHandler implements IOListener<HttpProtocol>,Handler<Htt
 
 	@Override
 	public void handle(NetSession<HttpProtocol> session, HttpProtocol request) {
-		String method =request.getRequestMethod();
-		String uri = request.getRequestUri();
-		String version=request.getHttpVersion();
-		AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, method+"_"+uri+"_"+version+"\\r\\n");
 		
+		SimpleHttpResponse response= new SimpleHttpResponse(session);
+		response.setHttpVersion(request.getHttpVersion());
+		response.setCharset(request.getCharset());
 		
-		for(Entry<String, String> header:request.getRequestHeads().entrySet()){
-			AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, header.getKey()+":"+header.getValue()+"\\r\\n");
-		}
-		AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, "\\r\\n");
-
-		
-		SimpleHttpResponse response=new SimpleHttpResponse(session);
-		response.setCharset("UTF-8");
-		
-		response.setHttpVersion(version);
-
-		
-		response.setHttpVersion("HTTP/1.1");
-		response.setStatusCode(200);
-		response.setContentType("text/html");
-		response.write("<html><head><title>It is a response page!</title></head>");
-		
-		response.write("hello world");
-		response.write("</body></html>");
 		try {
-			response.flush();
-		} catch (IOException e) {
+			this.context.doService(request, response);
+		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {
-			session_request.remove(session);
+		}finally {			
+			try {
+				response.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+//		String method =request.getRequestMethod();
+//		String uri = request.getRequestUri();
+//		String version=request.getHttpVersion();
+//		AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, method+"_"+uri+"_"+version+"\\r\\n");
+//		
+//		
+//		for(Entry<String, String> header:request.getRequestHeads().entrySet()){
+//			AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, header.getKey()+":"+header.getValue()+"\\r\\n");
+//		}
+//		AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, "\\r\\n");
+//
+//		
+//		SimpleHttpResponse response=new SimpleHttpResponse(session);
+//		response.setCharset("UTF-8");
+//		
+//		response.setHttpVersion(version);
+//
+//		
+//		response.setHttpVersion("HTTP/1.1");
+//		response.setStatusCode(200);
+//		response.setContentType("text/html");
+//		response.write("<html><head><title>It is a response page!</title></head>");
+//		
+//		response.write("hello world");
+//		response.write("</body></html>");
+//		try {
+//			response.flush();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}finally {
+//			session_request.remove(session);
+//		}
 		
 	}
 }

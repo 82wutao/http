@@ -365,6 +365,10 @@ public class HttpProtocol  implements HttpRequest {
 	@Override
 	public String getCharset() {
 		String value =headers.get(HttpRequest.Content_Type);
+		if (value==null) {
+			String set=this.charset.displayName();
+			return set;
+		}
 		String set =HttpHeaders.extractQuotedValueFromHeader(value, "charset");
 		if (set==null
 				||set.equals("")) {

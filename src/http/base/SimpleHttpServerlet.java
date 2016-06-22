@@ -1,9 +1,9 @@
 package http.base;
 
+import http.WebAppContext;
 import http.api.HttpRequest;
 import http.api.HttpResponse;
 import http.api.HttpServerlet;
-import http.api.WebAppContext;
 
 public class SimpleHttpServerlet implements HttpServerlet {
 

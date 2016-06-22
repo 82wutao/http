@@ -1,5 +1,7 @@
 package http.api;
 
+import http.WebAppContext;
+
 public interface HttpServerlet {
 	public void doGET(WebAppContext context, HttpRequest request,
 			HttpResponse response)throws Exception;
