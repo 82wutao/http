@@ -7,7 +7,7 @@ import java.util.List;
 
 import common.log.AppLogger;
 import http.HttpProtocol;
-import http.HttpServerContext;
+import http.WebAppContext;
 import net.ServerContext;
 import net.kernel.NetSession;
 import net.kernel.XIOService;
@@ -15,19 +15,8 @@ import net.kernel.XNetworkConfig;
 
 public class Runner {
 	public static void main(String[] args) throws IOException {
-//		if (args.length<2) {
-//			System.err.println("java -jar tools.jar path_of_conf.txt port");
-//			System.exit(1);
-//		}
 		AppLogger.initailLogs("debug", AppLogger.LogLvl.Debug,System.out);
-		ServerContext serverContext = new HttpServerContext();
-//		serverContext.initial(new File(args[0]));
-//
-//		NetworkConfig config = new NetworkConfig("", Short.parseShort(args[1]), new HttpProtocol());
-//		
-//		IOService service = new IOService(serverContext);
-//		service.configure(config);
-//		service.startListen();
+		ServerContext serverContext = new WebAppContext();
 		
 		
 		final XIOService<HttpProtocol> xioService=new XIOService<HttpProtocol>(serverContext);

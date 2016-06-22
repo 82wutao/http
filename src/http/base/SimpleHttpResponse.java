@@ -34,6 +34,7 @@ public class SimpleHttpResponse implements HttpResponse {
 	public SimpleHttpResponse(NetSession<HttpProtocol> session) {
 		headMap.put(HttpResponse.Connection, "close");
 		this.session = session;
+		charset = "UTF-8";
 	}
 
 	@Override
@@ -107,13 +108,19 @@ public class SimpleHttpResponse implements HttpResponse {
 
 	@Override
 	public void flush() throws IOException {
+		if (bodySize ==0) {
+			return;
+		}
 		
 		String contentType = headMap
 				.get(HttpResponse.Content_Type);
 		if (contentType == null) {
 			headMap.put(HttpResponse.Content_Type, ContentType.Text_Html);
 		}
+		headMap.put(HttpResponse.Content_Type,contentType);
+		
 		headMap.put(Content_Length, ""+bodySize);
+		bodySize =0;
 		
 		byte[] version = pv.getBytes(Charset.forName(charset));
 		session.write(version, 0, version.length);

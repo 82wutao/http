@@ -5,21 +5,6 @@ import java.io.IOException;
 import java.util.Map;
 
 public interface HttpResponse {
-	// public static final String Head_AcceptRanges_Response="Accept-Ranges";
-	// public static final String Head_Age_Response="Age";
-	// public static final String Head_CacheControl_Response="Cache-Control";
-	// public static final String Head_Connection_Response="Connection";
-	// public static final String
-	// Head_ContentEncoding_Response="Content-Encoding";
-	// public static final String Head_ContentLength_Response="Content-Length";
-	// public static final String Head_ContentType_Response="Content-Type";
-	//
-	// public static final String Head_Date_Response="Date";
-	// public static final String Head_Expires_Response="Expires";
-	// public static final String Head_Server_Response="Server";
-	// public static final String Head_SetCookie_Response="Set-Cookie";
-	// public static final String Head_Vary_Response="Vary";
-	// public static final String Head_XCache_Response="X-Cache";
 
 	/**
 	 * 指定哪些网站可参与到 跨来源资源共享 过程中 Access-Control-Allow-Origin: * Provisional

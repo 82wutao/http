@@ -10,13 +10,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import app.terminal.Cmd;
-
+import http.WebAppContext;
 import http.api.HttpRequest;
 import http.api.HttpResponse;
 import http.api.HttpServerlet;
 import http.api.RequestBody;
-import http.api.WebAppContext;
 
 public class StaticDocumentServerlet implements HttpServerlet {
 
@@ -24,42 +22,25 @@ public class StaticDocumentServerlet implements HttpServerlet {
 	public void doGET(WebAppContext context, HttpRequest request,
 			HttpResponse response) throws Exception{
 		String uri = request.getRequestUri();
+		String root = context.getWWWRoot();
 		if (!uri.equals("/")) {
-			
-			String filesysPath = context.getContextFileSystemPath();
-			String urlContext = context.getContextPath();
-
-			String diskFile = uri.replaceFirst(urlContext, filesysPath + "/");			
-			
-			if (uri.endsWith("ctlor")) {
-				handleScript(diskFile,context,request,response);
-				return ;
-			}
+			String diskFile = root+uri;		
 
 			handleDoc(diskFile, context, request, response);
 			return ;
 		}
 
-		String indexpage = context.getContextAttribute("index");
-		if (indexpage == null) {
-			response.setStatusCode(200);
-			response.setContentType("text/html");
-			response.write("This server is working!!");
-			return;
-		}
-		
-		String filesysPath = context.getContextFileSystemPath();
-		File index=new File(filesysPath+"/"+indexpage);
-		if (!index.exists()) {
-			response.setStatusCode(404);
-			response.setContentType("text/html");
-			response.write("The /"+indexpage+" not be found");
+		String indexpage = root+"/index.html";
+		File file = new File(indexpage);
+		if (file.exists()) {
+			handleDoc(indexpage, context, request, response);
 			return;
 		}
 		
 		response.setStatusCode(200);
 		response.setContentType("text/html");
-		response.write(index);
+		response.write("This server is working!!");
+		return;
 	}
 
 	@Override
@@ -122,7 +103,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 					byte[] buff =new byte[512];
 					String name = multiPartForm.getFileName();
 					
-					File file=new File(context.getContextAttribute("upload")+"/"+name);
+					File file=new File(context.getProperty("upload","./")+"/"+name);
 					OutputStream outputStream = new FileOutputStream(file);
 					
 					try {
@@ -159,7 +140,7 @@ public class StaticDocumentServerlet implements HttpServerlet {
 		}
 		
 		if (file.isDirectory()) {
-			String html=generateHtml(request.getRequestUri(),file);
+			String html=listDir(request.getRequestUri(),file);
 			response.setStatusCode(200);
 			response.setResponseHead(HttpResponse.Accept_Ranges,
 					"bytes");
@@ -183,45 +164,8 @@ public class StaticDocumentServerlet implements HttpServerlet {
 			response.write(file);
 		}
 	}
-	private void handleScript(String url,WebAppContext context, HttpRequest request,
-			HttpResponse response) throws Exception{
-		String cmd = request.getParamerValue("script");
-		response.setContentType("text/html");
-		response.write("<html><head><meta charset=\"UTF-8\"><title>"+cmd+"</title></head><body>");//输出数据
-		Exception exception=null;
-		try{
-			String appContext=context.getContextFileSystemPath();
-			
-			String result =Cmd.getInstance().execute("sh "+appContext+"/scripts/"+cmd+".sh", "utf8");
-			if (result!=null) {				
-				result.replaceAll("\n", "<br/>");
-				response.write(result);
-			}
-		}catch(Exception e){
-			throw e;
-//			e.printStackTrace();
-//			exception =e;
-//			response.write(e.getMessage());//输出数据
-//			response.write("<br/>");//输出一个换行符
-//			
-//			StackTraceElement[] stacks=exception.getStackTrace();
-//			for(int i=0;i<stacks.length;i++){
-//				String clazz= stacks[i].getClassName();
-//				String method= stacks[i].getMethodName();
-//				int line =stacks[i].getLineNumber();
-//				
-//				response.write(clazz);//输出数据
-//				response.write(":");//输出数据
-//				response.write(method);//输出数据
-//				response.write(":");//输出数据
-//				response.write(line+"");//输出数据
-//				response.write("<br/>");//输出一个换行符
-//			}
-		}
-		response.write("</body></html>");
-	}
 	
-	private String generateHtml(String uri,File dir){
+	private String listDir(String uri,File dir){
         String heading = "Directory " + uri;
         StringBuilder msg = new StringBuilder("<html><head><meta charset=\"UTF-8\"><title>" + heading + "</title><style><!--\n" +
             "span.dirname { font-weight: bold; }\n" +
