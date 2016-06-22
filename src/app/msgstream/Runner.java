@@ -1,16 +1,14 @@
 package app.msgstream;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
 import common.log.AppLogger;
+import http.HttpProtocol;
 import http.HttpServerContext;
-import http.api.ServerContext;
-import http.base.HttpProtocol;
+import net.ServerContext;
 import net.kernel.NetSession;
 import net.kernel.XIOService;
 import net.kernel.XNetworkConfig;
@@ -21,7 +19,7 @@ public class Runner {
 //			System.err.println("java -jar tools.jar path_of_conf.txt port");
 //			System.exit(1);
 //		}
-		AppLogger.initailLogs("debug", AppLogger.LogLvl.Debug, new BufferedWriter(new OutputStreamWriter(System.out)));
+		AppLogger.initailLogs("debug", AppLogger.LogLvl.Debug,System.out);
 		ServerContext serverContext = new HttpServerContext();
 //		serverContext.initial(new File(args[0]));
 //

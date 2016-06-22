@@ -3,9 +3,9 @@ package http.base.staticdoc;
 import http.api.HttpRequest;
 import http.api.HttpResponse;
 import http.api.HttpServerlet;
-import http.api.ServerContext;
 import http.api.WebAppContext;
 import http.protocol.ContentType;
+import net.ServerContext;
 
 import java.io.File;
 import java.util.HashMap;
@@ -76,7 +76,7 @@ public class SimpleWebAppContext implements WebAppContext {
 	
 	@Override
 	public String getContextAttribute(String param) {
-		return serverContext.getContextAttribute(param);
+		return serverContext.geProperty(param, null);
 	}
 
 	@Override

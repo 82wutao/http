@@ -1,7 +1,5 @@
 package net.kernel;
 
-import http.api.ServerContext;
-
 import java.io.IOException;
 import java.net.StandardSocketOptions;
 import java.nio.channels.ClosedChannelException;
@@ -18,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import common.Pair;
+import net.ServerContext;
 
 /***
  * 监听多个端口。每个端口配一个handler
@@ -34,15 +33,6 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 	private int wakeupLock = 0;
 	
 	private boolean running = false;
-//	private Pool<XBuffer> bufferPool= new Pool<XBuffer>(1024, 2048, new PoolableObjectFactory<XBuffer>() {
-//		@Override
-//		public XBuffer newObject() {
-//			return null;
-//		}
-//		public void freeObject(XBuffer t) {
-//			
-//		}
-//	});
 	
 	private ServerContext serverContext=null;
 
@@ -118,15 +108,14 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 							if (read==0) {
 								break;
 							}
+							
 							//TODO async handler
-							while(session.readableBufferRemaining()>0){
-								Request request =clientAttachment.t.ioListener.readable(session);
-								if (request !=null) {
-									//TODO async handler
-									clientAttachment.t.appHandler.handle(session, request);
-									continue;
-								}
-								break;
+							for(int readable =session.readableBufferRemaining();readable>0;readable =session.readableBufferRemaining()){
+								Request request =clientAttachment.t.ioListener.readable(session,readable);
+								if (request == null){break;}
+								
+								//TODO async handler
+								clientAttachment.t.appHandler.handle(session, request);
 							}
 						}while(false);						
 					}
@@ -137,14 +126,13 @@ public class XIOService<Request> implements Runnable,ChannelInterestEvent<Reques
 							int write = session.writeBytesToChanel();
 							if (write==0) {
 								break;
-							}
-							clientAttachment.t.ioListener.writed(session);
-							
+							}							
 							if(write ==-1){
 								closeNetSession(session);
 								clientAttachment.t.ioListener.closedChannel(session);
 								break;
 							}
+							clientAttachment.t.ioListener.writed(session,write);
 							
 						}while(false);	
 					}

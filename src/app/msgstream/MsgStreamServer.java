@@ -8,8 +8,8 @@ import java.util.Map;
 import app.msgstream.chains.NodeChain;
 import common.log.AppLogger;
 import common.log.AppLogger.LogLvl;
+import http.HttpProtocol;
 import http.api.RequestBody;
-import http.base.HttpProtocol;
 import net.Handler;
 import net.IOListener;
 import net.kernel.NetSession;
@@ -35,7 +35,7 @@ public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpPro
 		session_request.put(session,request);
 	}
 	@Override
-	public HttpProtocol readable(NetSession<HttpProtocol> session) {
+	public HttpProtocol readable(NetSession<HttpProtocol> session,int readable) {
 		HttpProtocol request =session_request.get(session);
 		if (request == null ) {
 			request=new HttpProtocol(Charset.forName("UTF-8"), session);
@@ -54,7 +54,7 @@ public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpPro
 	}
 
 	@Override
-	public void writed(NetSession<HttpProtocol> session) {}
+	public void writed(NetSession<HttpProtocol> session,int writed) {}
 
 	@Override
 	public void handle(NetSession<HttpProtocol> session, HttpProtocol request) {
@@ -100,6 +100,7 @@ public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpPro
 			}
 			return;
 		}
+		
 		Message data = new xx(json);
 		data.fields=data.convertRaw2Fields(json);
 		chain.calc(data);

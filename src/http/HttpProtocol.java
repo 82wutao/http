@@ -1,12 +1,12 @@
-package http.base;
+package http;
 
-import http.RequestBodyFormUrlencoded;
-import http.RequestBodyJson;
-import http.RequestBodyMultipartForm;
-import http.RequestBodyOctetStream;
-import http.RequestBodyText;
 import http.api.HttpRequest;
 import http.api.RequestBody;
+import http.body.RequestBodyFormUrlencoded;
+import http.body.RequestBodyJson;
+import http.body.RequestBodyMultipartForm;
+import http.body.RequestBodyOctetStream;
+import http.body.RequestBodyText;
 import http.protocol.ContentType;
 import http.protocol.HttpHeaders;
 import http.protocol.HttpMethods;
@@ -88,13 +88,6 @@ public class HttpProtocol  implements HttpRequest {
 					currentState = Parse_State_Finish;
 				}
 				return true;
-//			case Parse_State_Body:
-//				
-//				break;
-//			case Parse_State_Finish:
-//				
-//				return true;
-//	
 			}
 		}
 

@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import common.io.XBuffer;
+import http.HttpProtocol;
 import http.api.Cookie;
 import http.api.HttpResponse;
 import http.protocol.ContentType;

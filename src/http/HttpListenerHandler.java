@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import http.base.HttpProtocol;
+import common.log.AppLogger;
 import http.base.SimpleHttpResponse;
 import net.Handler;
 import net.IOListener;
@@ -36,7 +36,7 @@ public class HttpListenerHandler implements IOListener<HttpProtocol>,Handler<Htt
 
 	
 	@Override
-	public HttpProtocol readable(NetSession<HttpProtocol> session) {
+	public HttpProtocol readable(NetSession<HttpProtocol> session,int readable) {
 		HttpProtocol request =session_request.get(session);
 		if (request == null ) {
 			request=new HttpProtocol(Charset.forName("UTF-8"), session);
@@ -54,7 +54,7 @@ public class HttpListenerHandler implements IOListener<HttpProtocol>,Handler<Htt
 	}
 
 	@Override
-	public void writed(NetSession<HttpProtocol> session) {
+	public void writed(NetSession<HttpProtocol> session,int writed) {
 
 	}
 
@@ -63,13 +63,15 @@ public class HttpListenerHandler implements IOListener<HttpProtocol>,Handler<Htt
 		String method =request.getRequestMethod();
 		String uri = request.getRequestUri();
 		String version=request.getHttpVersion();
-		System.out.println(method+"_"+uri+"_"+version+"\\r\\n");
+		AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, method+"_"+uri+"_"+version+"\\r\\n");
+		
 		
 		for(Entry<String, String> header:request.getRequestHeads().entrySet()){
-			System.out.println(header.getKey()+":"+header.getValue()+"\\r\\n");			
+			AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, header.getKey()+":"+header.getValue()+"\\r\\n");
 		}
-		System.out.println("\\r\\n");
+		AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, "\\r\\n");
 
+		
 		SimpleHttpResponse response=new SimpleHttpResponse(session);
 		response.setCharset("UTF-8");
 		

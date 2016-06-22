@@ -85,7 +85,7 @@ public class NetSession<Request> {
 					sendQueue.add(sendableBuffer);
 				}
 				
-				readableBuffer =  ByteBuffer.allocate(config.sendBuffer);
+				sendableBuffer =  ByteBuffer.allocate(config.sendBuffer);
 			}
 			sendableBuffer.put(data,offset,length);
 		}
@@ -111,7 +111,7 @@ public class NetSession<Request> {
 					sendQueue.add(sendableBuffer);
 				}
 				
-				readableBuffer =  ByteBuffer.allocate(config.sendBuffer);
+				sendableBuffer =  ByteBuffer.allocate(config.sendBuffer);
 			}
 			sendableBuffer.put(v);
 		}
@@ -149,7 +149,7 @@ public class NetSession<Request> {
 			sendableBuffer.flip();
 			sendQueue.add(sendableBuffer);
 		}
-		readableBuffer =  ByteBuffer.allocate(config.sendBuffer);
+		sendableBuffer =  ByteBuffer.allocate(config.sendBuffer);
 		
 		channelInterestEvent.changeInterestEvent(this, 
 				ChannelInterestEvent.Read|ChannelInterestEvent.Write);
@@ -158,7 +158,7 @@ public class NetSession<Request> {
 	public int readableBufferRemaining(){
 		return readableBuffer.remaining();
 	}
-	public int readBytesFromChanel() throws IOException{
+	int readBytesFromChanel() throws IOException{
 		if (connection_status == Status_Closed) {
 			throw new IOException("connect is closed");
 		}
@@ -198,6 +198,7 @@ public class NetSession<Request> {
 		}
 		return builder.toString();
 	}
+	
 	private void skipRead(int skip){
 		int position = readableBuffer.position();
 		readableBuffer.position(position + skip);

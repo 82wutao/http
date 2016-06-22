@@ -1,10 +1,10 @@
-package http;
+package http.body;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 
+import http.HttpProtocol;
 import http.api.RequestBody;
-import http.base.HttpProtocol;
 import net.kernel.NetSession;
 
 /**

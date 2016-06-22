@@ -17,7 +17,7 @@ public interface IOListener<Request> {
 	 * @param session
 	 * @return
 	 */
-	public Request readable(NetSession<Request> session);
-	public void writed(NetSession<Request> session);
+	public Request readable(NetSession<Request> session,int readable);
+	public void writed(NetSession<Request> session,int writed);
 	public void closedChannel(NetSession<Request> session);
 }

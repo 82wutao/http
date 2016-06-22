@@ -1,10 +1,12 @@
-package http;
+package http.body;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
+import http.HttpProtocol;
 import http.api.RequestBody;
-import http.base.HttpProtocol;
 import net.kernel.NetSession;
 
 /**
@@ -12,15 +14,15 @@ import net.kernel.NetSession;
  * @author wutao
  *
  */
-public class RequestBodyJson implements RequestBody {
+public class RequestBodyFormUrlencoded implements RequestBody {
 	
 	private String charset = null;
 	private NetSession<HttpProtocol> session;
 
 	private String type = null;
-	private String json =null;
+	private Map<String, String[]> parameters=new HashMap<String, String[]>();
 
-	public RequestBodyJson(NetSession<HttpProtocol> netSession,String charset) {
+	public RequestBodyFormUrlencoded(NetSession<HttpProtocol> netSession,String charset) {
 		session = netSession; 
 		this.charset = charset;
 	}
@@ -34,17 +36,33 @@ public class RequestBodyJson implements RequestBody {
 			return 0;
 		}
 		
-		type = RequestBody.Part_Json;
+		type = RequestBody.Part_Paramater;
 		
+		String name = null;
 		StringBuilder stringBuilder = new StringBuilder();
 
 		for (int c = session.read(); c != -1; c = session.read()) {
+			if (c == '=') {
+				name = URLDecoder.decode(stringBuilder.toString(), charset);
+				stringBuilder.setLength(0);
+				continue;
+			} else if (c == '&') {
+				String value = URLDecoder.decode(stringBuilder.toString(), charset);
+				
+				parameters.put(name, new String[] { value });
+				name = null;
+
+				stringBuilder.setLength(0);
+				continue;
+			}
 			stringBuilder.append((char) c);
 		}
 
-		json = URLDecoder.decode(stringBuilder.toString(), charset);
-		stringBuilder.setLength(0);
+		String value = URLDecoder.decode(stringBuilder.toString(), charset);
+		parameters.put(name, new String[] { value });
+		name = null;
 
+		stringBuilder.setLength(0);
 
 		return 1;
 	}
@@ -70,7 +88,7 @@ public class RequestBodyJson implements RequestBody {
 	 */
 	@Override
 	public String[] getParameter(String name) {
-		return null;
+		return parameters.get(name);
 	}
 
 	/* (non-Javadoc)
@@ -82,6 +100,6 @@ public class RequestBodyJson implements RequestBody {
 	}
 	@Override
 	public String getString() {
-		return json;
+		return null;
 	}
 }

@@ -2,6 +2,7 @@ package common.log;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.HashMap;
@@ -12,12 +13,12 @@ public class AppLogger {
 		Debug,Info,Warn,Err
 	}
 	LogLvl logLvl;
-	Writer out;
+	OutputStream out;
 	
 	
 	
 	private static Map<String, AppLogger> map = new HashMap<String,AppLogger>();
-	public static void initailLogs(String name,LogLvl lvl,Writer out){
+	public static void initailLogs(String name,LogLvl lvl,OutputStream out){
 		AppLogger logger = map.get(name);
 		if (logger==null) {
 			logger = new AppLogger();
@@ -31,7 +32,7 @@ public class AppLogger {
 		AppLogger logger = map.get(name);
 		if (logger==null) {
 			logger = new AppLogger();
-			logger.out=new BufferedWriter(new OutputStreamWriter(System.out));
+			logger.out=System.out;
 			logger.logLvl=LogLvl.Debug;
 			map.put(name,logger);
 		}
@@ -42,8 +43,9 @@ public class AppLogger {
 		if (logLvl.ordinal() < this.logLvl.ordinal()) {
 			return ;
 		}
+		System.out.println();
 		try {
-			this.out.write(msg);
+			this.out.write(msg.getBytes());
 			this.out.write('\n');
 		} catch (IOException e) {
 			e.printStackTrace();

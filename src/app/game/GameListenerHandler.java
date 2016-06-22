@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import common.io.XBuffer;
+import http.HttpProtocol;
 import http.api.HttpRequest;
 import http.api.HttpResponse;
 import http.api.RequestBody;
-import http.base.HttpProtocol;
 import http.base.SimpleHttpResponse;
 import http.protocol.ContentType;
 import net.Handler;
@@ -38,7 +38,7 @@ public class GameListenerHandler implements IOListener<HttpProtocol>,Handler<Htt
 
 	
 	@Override
-	public HttpProtocol readable(NetSession<HttpProtocol> session) {
+	public HttpProtocol readable(NetSession<HttpProtocol> session,int readable) {
 		HttpProtocol request =session_request.get(session);
 		if (request == null ) {
 			request=new HttpProtocol(Charset.forName("UTF-8"), session);
@@ -56,7 +56,7 @@ public class GameListenerHandler implements IOListener<HttpProtocol>,Handler<Htt
 	}
 
 	@Override
-	public void writed(NetSession<HttpProtocol> session) {
+	public void writed(NetSession<HttpProtocol> session,int writed) {
 
 	}
 
