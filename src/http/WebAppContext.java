@@ -10,6 +10,7 @@ import java.util.Properties;
 import http.api.HttpRequest;
 import http.api.HttpResponse;
 import http.api.HttpServerlet;
+import http.api.Route;
 import http.base.staticdoc.StaticDocumentServerlet;
 import http.protocol.ContentType;
 import net.ServerContext;
@@ -19,8 +20,9 @@ public class WebAppContext implements ServerContext {
 	private Properties properties=null;
 	private Map<String, Object> attributes = new HashMap<String,Object>();
 
-	HttpServerlet documentServerlet = new StaticDocumentServerlet();
+	private HttpServerlet documentServerlet = new StaticDocumentServerlet();
 	
+	private Route route = new Route();
 	public WebAppContext() {
 
 	}
@@ -85,14 +87,17 @@ public class WebAppContext implements ServerContext {
 	public String getWWWRoot(){
 			return getProperty("wwwroot", "./");
 	}
-
+	public Route getRoute() {
+		return route;
+	}
+	public void registRoute(String url,HttpServerlet serverlet){
+		route.registRoute(url, serverlet);
+	}
 	public void doService(HttpRequest request, HttpResponse response)throws Exception {
-		String method = request.getRequestMethod();
-		HttpServerlet serverlet =documentServerlet;
+		String uri = request.getRequestUri();
+		HttpServerlet serverlet=this.route.matchHttpServerlet(uri);
 		
-		if (request.getRequestUri().endsWith("do")) {
-			serverlet =null;//TODO
-		}
+		String method = request.getRequestMethod();
 		
 		if (method.equals("CONNECT")) {
 			serverlet.doCONNECT(this, request, response);
@@ -112,6 +117,13 @@ public class WebAppContext implements ServerContext {
 			serverlet.doGET(this, request, response);
 		}
 
+	}
+	
+	public void redirect(String url,HttpResponse response){
+		
+	}
+	public void forward(String url,HttpRequest request){
+		
 	}
 	
 }

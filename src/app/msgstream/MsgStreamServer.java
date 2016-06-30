@@ -104,23 +104,7 @@ public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpPro
 		Message data = new xx(json);
 		data.fields=data.convertRaw2Fields(json);
 		chain.calc(data);
-//		System.out.println("json "+json);
-//	
-//		SimpleHttpResponse resp=new SimpleHttpResponse(session);
-//		resp.setCharset("UTF-8");
-//		resp.setHttpVersion("HTTP/1.1");
-//		resp.setStatusCode(200);
-//		resp.setContentType(ContentType.Application_Json);
-//		
-//		resp.setResponseHead(HttpRequest.Content_Type, ContentType.Application_Json);
-//		resp.write(json);
-//
-//		try {
-//			resp.flush();
-//		} catch (IOException e) {
-//			AppLogger logger =AppLogger.getLogger("debug");
-//			logger.log(LogLvl.Debug, "測試response輸出出錯");
-//		}
+
 	}
 	
 }

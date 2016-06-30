@@ -157,7 +157,10 @@ public class SimpleHttpResponse implements HttpResponse {
 					session.write(array, 0, readed);
 				}
 			} finally {
-				inputStream.close();
+				try{
+					inputStream.close();
+				}catch(IOException e){
+				}
 			}
 		}
 	}

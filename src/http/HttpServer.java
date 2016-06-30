@@ -6,6 +6,7 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.List;
 
+import http.base.staticdoc.StaticDocumentServerlet;
 import net.kernel.NetSession;
 import net.kernel.XIOService;
 import net.kernel.XNetworkConfig;
@@ -17,6 +18,13 @@ public class HttpServer {
 	public void start() throws IOException{
 		WebAppContext serverContext = new WebAppContext();
 		serverContext.initial(new File("config.txt"));
+		
+		
+		StaticDocumentServerlet doc=new StaticDocumentServerlet();
+		serverContext.registRoute("/css/.*", doc);
+		serverContext.registRoute("/js/.*", doc);
+		serverContext.registRoute("/img/.*", doc);
+		serverContext.registRoute("/.*\\.html", doc);
 		
 		xioService=new XIOService<HttpProtocol>(serverContext);
 		

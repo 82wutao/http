@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import common.log.AppLogger;
 import http.base.SimpleHttpResponse;
 import net.Handler;
 import net.IOListener;
@@ -73,6 +71,12 @@ public class HttpListenerHandler implements IOListener<HttpProtocol>,Handler<Htt
 			this.context.doService(request, response);
 		} catch (Exception e) {
 			e.printStackTrace();
+			response.setStatusCode(500);
+			
+			response.write(e.getMessage()+"<br>");
+			for(StackTraceElement element:e.getStackTrace()){
+				response.write(element.getClassName()+":"+element.getMethodName()+":"+element.getLineNumber()+"<br>");
+			}
 		}finally {			
 			try {
 				response.flush();
@@ -80,38 +84,5 @@ public class HttpListenerHandler implements IOListener<HttpProtocol>,Handler<Htt
 				e.printStackTrace();
 			}
 		}
-//		String method =request.getRequestMethod();
-//		String uri = request.getRequestUri();
-//		String version=request.getHttpVersion();
-//		AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, method+"_"+uri+"_"+version+"\\r\\n");
-//		
-//		
-//		for(Entry<String, String> header:request.getRequestHeads().entrySet()){
-//			AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, header.getKey()+":"+header.getValue()+"\\r\\n");
-//		}
-//		AppLogger.getLogger("debug").log(AppLogger.LogLvl.Debug, "\\r\\n");
-//
-//		
-//		SimpleHttpResponse response=new SimpleHttpResponse(session);
-//		response.setCharset("UTF-8");
-//		
-//		response.setHttpVersion(version);
-//
-//		
-//		response.setHttpVersion("HTTP/1.1");
-//		response.setStatusCode(200);
-//		response.setContentType("text/html");
-//		response.write("<html><head><title>It is a response page!</title></head>");
-//		
-//		response.write("hello world");
-//		response.write("</body></html>");
-//		try {
-//			response.flush();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}finally {
-//			session_request.remove(session);
-//		}
-		
 	}
 }
