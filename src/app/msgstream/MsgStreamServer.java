@@ -101,7 +101,13 @@ public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpPro
 			return;
 		}
 		
-		Message data = new xx(json);
+		Message data =new Message(String a) {
+			String bString =a;
+			@Override
+			public String[] convertRaw2Fields(String raw) {
+				return null;
+			}
+		};
 		data.fields=data.convertRaw2Fields(json);
 		chain.calc(data);
 

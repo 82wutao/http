@@ -1,12 +1,13 @@
 		.page{background-color:#D6D6D6;width:520px;height:736px;float:left;margin:2px 2px 2px 2px;writing-mode:tb-rl;}
 		.page p{margin:10px 12px 10px 12px;}
+		.page .content{text-indent: 2em;}
 
 		.cover{text-align:center;}
-		.cover .name{font-family:'Á¥Êé';font-size:300%;}
+		.cover .name{font-family:'éš¶ä¹¦';font-size:300%;}
 		
 		.preface{}
-		.preface .content{text-indent: 2em;}
 
 		.catalogue{}
+
 		.words{}
 		.words .tag{}
