@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.String;
 
 import app.msgstream.chains.NodeChain;
 import common.log.AppLogger;
@@ -101,11 +102,11 @@ public class MsgStreamServer implements IOListener<HttpProtocol>,Handler<HttpPro
 			return;
 		}
 		
-		Message data =new Message(String a) {
-			String bString =a;
+		Message data =new Message("") {
+			
 			@Override
 			public String[] convertRaw2Fields(String raw) {
-				return null;
+				return this.raw.split(" ");
 			}
 		};
 		data.fields=data.convertRaw2Fields(json);
