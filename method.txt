@@ -65,3 +65,11 @@ The TRACE method is used to invoke a remote application layer associated with a 
 
 关于http协议涉及方法的两个名词解释：safe型方法和Idempotent型方法。
 safe型方法通常是指不影响服务器端资源的行为.它的操作结果仅仅是读取信息，GET和HEAD多数情况下被认为具有“safe”的特性。
+
+
+
+
+
+根据每日生产总和与玩家收入来对账，确定有没有刷道具
+每日扫描道具日志，固定的行为模式来确定玩家作弊
+协议的破解（坐地发广播）与加密
